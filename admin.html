@@ -317,10 +317,23 @@ function showTab(tab){
 
                 html+=`
                 <div class="stat">
+                
                     <strong>${d.name}</strong><br>
+                    
+                    🛒 <strong style="color:${d.orderType==="delivery"?"#28a745":"#007bff"}">
+                    ${d.orderType === "delivery" ? "🚚 Delivery" : "📦 Pickup"}
+                    </strong><br>
+                    
                     📞 ${d.phone}<br>
-                    📍 ${d.address||"No address"}<br>
-                    📝 ${d.comment||"No notes"}<br><br>
+                    
+                    ${d.orderType==="delivery"
+                        ? `📍 ${d.address || "No address"}<br>
+                           💳 ${d.paymentType || "N/A"}<br>
+                           🚚 Fee: ${d.deliveryFee || 0} OMR<br>`
+                        : `📦 Pickup Order<br>`
+                    }
+                    
+                    📝 ${d.comment || "No notes"}<br><br>
 
                     ${formatCart(d.cart)}
 
