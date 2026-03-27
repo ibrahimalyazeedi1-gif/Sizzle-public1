@@ -2,30 +2,192 @@
 <html lang="en">
 <head>
 
-<!-- ✅ VIEWPORT -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
 <meta charset="UTF-8">
 <title>Sizzle - Cart</title>
 
 <link rel="stylesheet" href="style.css">
 
-<!-- 🔥 Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+
+/* 🔴 BASE */
+body {
+    margin:0;
+    font-family:'Segoe UI', sans-serif;
+    background:#d9c3a3;
+}
+
+/* 🔴 HEADER */
+.header {
+    background:#ad0202;
+    padding:20px;
+    text-align:center;
+    position:relative;
+}
+
+.logo {
+    height:70px;
+    display:block;
+    margin:0 auto;
+}
+
+/* LOGIN */
+.auth-btn {
+    position:absolute;
+    top:15px;
+    right:15px;
+    background:#f5e6d3;
+    color:#ad0202;
+    padding:10px 16px;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* NAV */
+.categories {
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    background:#7a0000;
+    padding:10px;
+}
+
+.categories a {
+    color:white;
+    text-decoration:none;
+    background:#a83232;
+    padding:8px 14px;
+    border-radius:20px;
+}
+
+/* TITLE */
+.section-title {
+    text-align:center;
+    margin-top:15px;
+}
+
+/* 🔥 TABS FIXED */
+.type-tabs {
+    display:flex;
+    width:90%;
+    max-width:450px;
+    margin:15px auto;
+    border-radius:12px;
+    overflow:hidden;
+    background:#ccc;
+}
+
+.type-tabs button {
+    flex:1;
+    padding:10px;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+    background:transparent;
+}
+
+.type-tabs .active {
+    background:#ad0202;
+    color:white;
+}
+
+/* 🔥 ORDER BOX */
+.order-box {
+    width:90%;
+    max-width:450px;
+    margin:15px auto;
+    background:#7a0000;
+    padding:15px;
+    border-radius:12px;
+    color:white;
+
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+
+/* INPUTS */
+.order-box input,
+.order-box select,
+.comment-input {
+    width:100%;
+    padding:14px;
+    border-radius:10px;
+    border:none;
+    background:#f5e6d3;
+    color:#b30000;
+    font-weight:bold;
+    box-sizing:border-box;
+}
+
+/* 🔥 TEXTAREA FIXED */
+.comment-input {
+    min-height:90px;
+    resize:none;
+}
+
+/* ADDRESS ROW */
+.address-row {
+    display:flex;
+    gap:10px;
+}
+
+.address-input {
+    flex:1;
+}
+
+.location-btn {
+    width:50px;
+    border:none;
+    border-radius:10px;
+    background:#f5e6d3;
+    cursor:pointer;
+}
+
+/* BUTTON */
+#orderBtn {
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#f5e6d3;
+    color:#ad0202;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* CART ITEMS */
+.receipt-item {
+    display:flex;
+    justify-content:space-between;
+}
+
+.qty-controls button {
+    padding:5px;
+}
+
+.success-msg {
+    background:#28a745;
+    padding:10px;
+    border-radius:8px;
+    text-align:center;
+}
+
+</style>
 
 </head>
 
 <body>
 
-<!-- 🔴 HEADER -->
 <div class="header">
-    <img src="./images/logo.png" class="logo">
+    <img src="images/logo.png" class="logo">
     <div id="authBtn" class="auth-btn">Login</div>
 </div>
 
-<!-- NAV -->
 <div class="categories">
     <a href="index.html">Home</a>
     <a href="cart.html">Cart</a>
@@ -34,10 +196,10 @@
 
 <h2 class="section-title">Your Cart</h2>
 
-<!-- 🔥 ORDER TYPE TABS -->
+<!-- 🔥 TABS -->
 <div class="type-tabs">
-    <button id="deliveryTab" class="active" onclick="setOrderType('delivery')">🚚 Delivery</button>
-    <button id="pickupTab" onclick="setOrderType('pickup')">🛍 Pickup</button>
+    <button id="deliveryTab" class="active" onclick="setType('delivery')">🚚 Delivery</button>
+    <button id="pickupTab" onclick="setType('pickup')">🛍 Pickup</button>
 </div>
 
 <!-- CART -->
@@ -76,11 +238,10 @@
 
 <script>
 
-/* 🔥 GLOBAL ORDER TYPE */
 let orderType = "delivery";
 
-/* 🔥 SWITCH TYPE */
-function setOrderType(type){
+/* 🔥 SWITCH */
+function setType(type){
     orderType = type;
 
     document.getElementById("deliveryTab").classList.remove("active");
@@ -97,6 +258,7 @@ function setOrderType(type){
     saveForm();
 }
 
+/* FIREBASE */
 const firebaseConfig = {
     apiKey: "AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
     authDomain: "sizzle-oman.firebaseapp.com",
@@ -108,40 +270,15 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-/* GUEST */
-if (!localStorage.getItem("guestId")) {
-    localStorage.setItem("guestId", Date.now().toString());
-}
-
-/* 🔐 AUTH */
+/* LOAD */
 window.onload = function () {
 
-    const btn = document.getElementById("authBtn");
-
     auth.onAuthStateChanged(user => {
-        btn.innerHTML = user ? "👤" : "Login";
-
-        if (user) {
-            const pending = localStorage.getItem("pendingOrder");
-
-            if (pending) {
-                const orderData = JSON.parse(pending);
-
-                setTimeout(() => {
-                    submitOrder(orderData);
-                }, 500);
-            }
-        }
+        document.getElementById("authBtn").innerHTML = user ? "👤" : "Login";
     });
 
-    btn.onclick = function () {
-        window.location.href = auth.currentUser ? "profile.html" : "login.html";
-    };
-
-    /* LOAD SAVED */
     const saved = JSON.parse(localStorage.getItem("orderForm"));
-    if (saved) {
-
+    if(saved){
         document.querySelector(".name-input").value = saved.name || "";
         document.querySelector(".phone-input").value = saved.phone || "";
         document.querySelector(".address-input").value = saved.address || "";
@@ -149,7 +286,7 @@ window.onload = function () {
         document.querySelector(".payment-select").value = saved.paymentType || "Cash";
 
         if(saved.orderType){
-            setOrderType(saved.orderType);
+            setType(saved.orderType);
         }
     }
 
@@ -157,113 +294,52 @@ window.onload = function () {
 };
 
 /* CART */
-function loadCart() {
-
+function loadCart(){
     const cart = JSON.parse(localStorage.getItem("cart")) || {};
     const container = document.getElementById("cart-items");
 
-    container.innerHTML = "";
+    let html = "";
+    let total = 0;
 
-    let subtotal = 0;
-    const items = Object.entries(cart);
+    for(let id in cart){
+        const item = cart[id];
+        const t = item.qty * item.price;
+        total += t;
 
-    if (items.length === 0) {
-        container.innerHTML = "<p>No items added yet</p>";
-        return;
+        html += `<div class="receipt-item">
+            <span>${item.qty}x ${id}</span>
+            <span>${t.toFixed(2)} OMR</span>
+        </div>`;
     }
 
-    let html = "";
+    html += `<hr>Total: ${(total*1.05).toFixed(2)} OMR`;
 
-    items.forEach(([id, data]) => {
-
-        if (!data || !data.qty || !data.price) return;
-
-        const itemTotal = data.qty * data.price;
-        subtotal += itemTotal;
-
-        html += `
-        <div class="receipt-item">
-            <div class="receipt-left">
-                <span>${id.replace(/_/g, " ")}</span>
-            </div>
-
-            <div class="receipt-right">
-                <div class="qty-controls">
-                    <button onclick="changeCartQty('${id}', -1)">-</button>
-                    <span>${data.qty}</span>
-                    <button onclick="changeCartQty('${id}', 1)">+</button>
-                </div>
-                <span class="item-total">${itemTotal.toFixed(2)} OMR</span>
-            </div>
-        </div>
-        `;
-    });
-
-    const total = Math.round(subtotal * 1.05 * 100) / 100;
-
-    html += `
-    <div class="receipt-summary">
-        <div class="summary-row total">
-            <span>Total (incl. 5%)</span>
-            <span>${total.toFixed(2)} OMR</span>
-        </div>
-    </div>
-    `;
-
-    container.innerHTML = html;
-}
-
-/* QTY */
-function changeCartQty(id, change) {
-
-    let cart = JSON.parse(localStorage.getItem("cart")) || {};
-
-    if (!cart[id]) return;
-
-    cart[id].qty += change;
-
-    if (cart[id].qty <= 0) delete cart[id];
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    loadCart();
-}
-
-/* LOCATION */
-function getLocation() {
-
-    navigator.geolocation.getCurrentPosition(
-        pos => {
-            const lat = pos.coords.latitude;
-            const lng = pos.coords.longitude;
-
-            document.querySelector(".address-input").value =
-                `https://maps.google.com/?q=${lat},${lng}`;
-
-            saveForm();
-        },
-        () => alert("Location failed."),
-        { enableHighAccuracy: true }
-    );
+    container.innerHTML = html || "No items";
 }
 
 /* SAVE */
-function saveForm() {
-
-    const data = {
-        name: document.querySelector(".name-input").value,
-        phone: document.querySelector(".phone-input").value,
-        address: document.querySelector(".address-input")?.value || "",
-        comment: document.querySelector(".comment-input").value,
-        paymentType: document.querySelector(".payment-select")?.value || "",
+function saveForm(){
+    localStorage.setItem("orderForm", JSON.stringify({
+        name:document.querySelector(".name-input").value,
+        phone:document.querySelector(".phone-input").value,
+        address:document.querySelector(".address-input")?.value || "",
+        comment:document.querySelector(".comment-input").value,
+        paymentType:document.querySelector(".payment-select")?.value || "",
         orderType
-    };
-
-    localStorage.setItem("orderForm", JSON.stringify(data));
+    }));
 }
 
-/* PLACE */
-async function placeOrder() {
+/* LOCATION */
+function getLocation(){
+    navigator.geolocation.getCurrentPosition(pos=>{
+        document.querySelector(".address-input").value =
+        `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+        saveForm();
+    });
+}
+
+/* ORDER */
+async function placeOrder(){
 
     const cart = JSON.parse(localStorage.getItem("cart")) || {};
 
@@ -273,103 +349,36 @@ async function placeOrder() {
     const paymentType = document.querySelector(".payment-select").value;
     const comment = document.querySelector(".comment-input").value;
 
-    if (!name || !phone) {
+    if(!name || !phone){
         alert("Fill required fields");
         return;
     }
 
-    if (orderType === "delivery" && !address) {
-        alert("Address required for delivery");
+    if(orderType === "delivery" && !address){
+        alert("Address required");
         return;
     }
 
-    submitOrder({
+    await db.collection("orders").add({
         name,
         phone,
-        address,
-        paymentType,
+        address: orderType==="delivery"?address:"",
+        paymentType: orderType==="delivery"?paymentType:"",
         comment,
         cart,
-        orderType
+        orderType,
+        time:new Date()
     });
-}
 
-/* SUBMIT */
-async function submitOrder(orderData) {
+    alert("Order placed");
 
-    const btn = document.getElementById("orderBtn");
-    btn.disabled = true;
+    localStorage.removeItem("cart");
+    localStorage.removeItem("orderForm");
 
-    try {
-
-        const doc = await db.collection("settings").doc("restaurant").get();
-
-        if (!doc.exists || !doc.data().open) {
-            alert("Restaurant is CLOSED");
-            btn.disabled = false;
-            return;
-        }
-
-        const user = auth.currentUser;
-
-        await db.collection("orders").add({
-            ...orderData,
-            userId: user 
-                ? user.uid 
-                : "guest_" + localStorage.getItem("guestId"),
-            time: new Date()
-        });
-
-        const box = document.querySelector(".order-box:last-of-type");
-        box.innerHTML += `<div class="success-msg">✅ Order placed!</div>`;
-
-        localStorage.removeItem("cart");
-        localStorage.removeItem("pendingOrder");
-        localStorage.removeItem("orderForm");
-
-        document.querySelector(".name-input").value = "";
-        document.querySelector(".phone-input").value = "";
-        document.querySelector(".address-input").value = "";
-        document.querySelector(".comment-input").value = "";
-        document.querySelector(".payment-select").value = "Cash";
-
-        loadCart();
-
-    } catch (err) {
-        console.error(err);
-        alert("Order failed");
-    }
-
-    btn.disabled = false;
+    loadCart();
 }
 
 </script>
-
-<style>
-
-/* TABS */
-.type-tabs {
-    display:flex;
-    margin:15px;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-.type-tabs button {
-    flex:1;
-    padding:12px;
-    border:none;
-    font-weight:bold;
-    cursor:pointer;
-    background:#ddd;
-}
-
-.type-tabs .active {
-    background:#ad0202;
-    color:white;
-}
-
-</style>
 
 </body>
 </html>
