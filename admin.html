@@ -361,21 +361,21 @@ function showTab(tab){
     if(tab==="menu"){
         menuBtn.classList.add("active");
         title.innerText="🍗 Menu Control";
-
-        db.collection("menu").onSnapshot(async snap=>{
-
+    
+        db.collection("menu").onSnapshot(snap=>{
+    
             let menuData = {};
-
+    
             snap.forEach(doc=>{
                 menuData[doc.id] = doc.data().enabled;
             });
-
+    
             let html = "";
-
+    
             for(let item in MENU_ITEMS){
-
-                const enabled = menuData[item] !=== true;// default ON
-
+    
+                const enabled = menuData[item] !== false; // ✅ FIXED
+    
                 html += `
                 <div class="stat">
                     <strong>${item.replace(/_/g," ")}</strong><br>
@@ -385,7 +385,7 @@ function showTab(tab){
                     </button>
                 </div>`;
             }
-
+    
             content.innerHTML = html;
         });
     }
