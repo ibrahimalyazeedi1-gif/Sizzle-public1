@@ -428,6 +428,20 @@ async function placeOrder(){
 
     const cart = JSON.parse(localStorage.getItem("cart")) || {};
 
+    // ✅ FIX: remove items with qty <= 0
+    const cleanedCart = {};
+    Object.keys(cart).forEach(id => {
+        if (cart[id] && cart[id].qty > 0) {
+            cleanedCart[id] = cart[id];
+        }
+    });
+
+    // ✅ FIX: block empty cart
+    if (Object.keys(cleanedCart).length === 0) {
+        alert("Your cart is empty");
+        return;
+    }
+
     const name = document.querySelector(".name-input").value;
     const phone = document.querySelector(".phone-input").value;
     const address = document.querySelector(".address-input").value;
@@ -450,7 +464,7 @@ async function placeOrder(){
         address: orderType==="delivery"?address:"",
         paymentType: orderType==="delivery"?paymentType:"",
         comment,
-        cart,
+        cart: cleanedCart, // ✅ use cleaned cart
         orderType,
         deliveryFee: orderType==="delivery" ? 0.6 : 0,
         time:new Date()
