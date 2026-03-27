@@ -276,9 +276,20 @@ const auth = firebase.auth();
 /* LOAD */
 window.onload = function () {
 
+    const btn = document.getElementById("authBtn");
+
     auth.onAuthStateChanged(user => {
-        document.getElementById("authBtn").innerHTML = user ? "👤" : "Login";
+        btn.innerHTML = user ? "👤" : "Login";
     });
+
+    // ✅ THIS WAS MISSING
+    btn.onclick = function () {
+        if (auth.currentUser) {
+            window.location.href = "profile.html";
+        } else {
+            window.location.href = "login.html";
+        }
+    };
 
     const saved = JSON.parse(localStorage.getItem("orderForm"));
     if(saved){
