@@ -179,6 +179,25 @@ body {
     text-align:center;
 }
 
+#toast {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #28a745;
+    color: white;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-weight: bold;
+    opacity: 0;
+    transition: all 0.4s ease;
+    z-index: 999;
+}
+
+#toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}    
 </style>
 
 </head>
@@ -235,6 +254,7 @@ body {
     <textarea class="comment-input" placeholder="Add notes (no onions, extra sauce)" oninput="saveForm()"></textarea>
 
     <button id="orderBtn" onclick="placeOrder()">Place Order</button>
+    <div id="toast"></div>
 
 </div>
 
@@ -445,7 +465,7 @@ async function placeOrder(){
     // ✅ FIX: block empty cart
     if (Object.keys(cleanedCart).length === 0) {
         document.getElementById("cart-items").innerHTML =
-        "<p style='color:yellow;'>Your cart is empty</p>";
+        "<p style='font-weight: bold; color: white;'>Your cart is empty</p>";
         return;
     }
 
@@ -477,7 +497,7 @@ async function placeOrder(){
         time:new Date()
     });
 
-    alert("Order placed");
+    showToast("✅ Order placed successfully");
 
     localStorage.removeItem("cart");
     localStorage.removeItem("orderForm");
@@ -485,6 +505,16 @@ async function placeOrder(){
     loadCart();
 }
 
+function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.innerText = message;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2500);
+}
 </script>
 
 </body>
