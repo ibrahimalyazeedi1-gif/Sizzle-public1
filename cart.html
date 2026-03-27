@@ -322,11 +322,6 @@ function loadCart() {
     // ✅ SAVE CLEAN CART
     localStorage.setItem("cart", JSON.stringify(cart));
     
-    if (Object.keys(cart).length === 0) {
-        alert("Your cart is empty");
-        return;
-    }
-    
     const container = document.getElementById("cart-items");
 
     container.innerHTML = "";
