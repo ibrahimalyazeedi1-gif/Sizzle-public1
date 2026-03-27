@@ -2,27 +2,30 @@
 <html lang="en">
 <head>
 
-    <!-- ✅ FIXED VIEWPORT -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<!-- ✅ VIEWPORT -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <meta charset="UTF-8">
-    <title>Sizzle - Cart</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Sizzle - Cart</title>
 
-    <!-- 🔥 Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<link rel="stylesheet" href="style.css">
+
+<!-- 🔥 Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 </head>
 
 <body>
 
+<!-- 🔴 HEADER -->
 <div class="header">
-    <img src="images/logo.png" class="logo">
+    <img src="./images/logo.png" class="logo">
     <div id="authBtn" class="auth-btn">Login</div>
 </div>
 
+<!-- NAV -->
 <div class="categories">
     <a href="index.html">Home</a>
     <a href="cart.html">Cart</a>
@@ -31,35 +34,69 @@
 
 <h2 class="section-title">Your Cart</h2>
 
+<!-- 🔥 ORDER TYPE TABS -->
+<div class="type-tabs">
+    <button id="deliveryTab" class="active" onclick="setOrderType('delivery')">🚚 Delivery</button>
+    <button id="pickupTab" onclick="setOrderType('pickup')">🛍 Pickup</button>
+</div>
+
+<!-- CART -->
 <div class="order-box" id="cart-items">
     <p>No items added yet</p>
 </div>
 
+<!-- FORM -->
 <div class="order-box">
-    <h2>Payment</h2>
 
-    <!-- ✅ ADDED oninput -->
+    <h2>Order Details</h2>
+
     <input class="name-input" placeholder="Your Name" oninput="saveForm()">
     <input class="phone-input" placeholder="Phone Number" oninput="saveForm()">
 
-    <div class="address-row">
-        <input class="address-input" placeholder="Address" oninput="saveForm()">
-        <button class="location-btn" onclick="getLocation()">📍</button>
+    <!-- DELIVERY ONLY -->
+    <div id="deliveryFields">
+
+        <div class="address-row">
+            <input class="address-input" placeholder="Address" oninput="saveForm()">
+            <button class="location-btn" onclick="getLocation()">📍</button>
+        </div>
+
+        <select onchange="saveForm()" class="payment-select">
+            <option>Cash</option>
+            <option>Card on Delivery</option>
+        </select>
+
     </div>
 
-    <!-- ✅ ADDED oninput -->
     <textarea class="comment-input" placeholder="Add notes (no onions, extra sauce)" oninput="saveForm()"></textarea>
 
-    <!-- ✅ ADDED onchange -->
-    <select onchange="saveForm()">
-        <option>Cash</option>
-        <option>Card on Delivery</option>
-    </select>
-
     <button id="orderBtn" onclick="placeOrder()">Place Order</button>
+
 </div>
 
 <script>
+
+/* 🔥 GLOBAL ORDER TYPE */
+let orderType = "delivery";
+
+/* 🔥 SWITCH TYPE */
+function setOrderType(type){
+    orderType = type;
+
+    document.getElementById("deliveryTab").classList.remove("active");
+    document.getElementById("pickupTab").classList.remove("active");
+
+    if(type === "delivery"){
+        document.getElementById("deliveryTab").classList.add("active");
+        document.getElementById("deliveryFields").style.display = "block";
+    } else {
+        document.getElementById("pickupTab").classList.add("active");
+        document.getElementById("deliveryFields").style.display = "none";
+    }
+
+    saveForm();
+}
+
 const firebaseConfig = {
     apiKey: "AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
     authDomain: "sizzle-oman.firebaseapp.com",
@@ -71,11 +108,12 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
+/* GUEST */
 if (!localStorage.getItem("guestId")) {
     localStorage.setItem("guestId", Date.now().toString());
 }
 
-// 🔐 LOGIN BUTTON
+/* 🔐 AUTH */
 window.onload = function () {
 
     const btn = document.getElementById("authBtn");
@@ -100,21 +138,25 @@ window.onload = function () {
         window.location.href = auth.currentUser ? "profile.html" : "login.html";
     };
 
-    // ✅ LOAD SAVED FORM (ADDED)
+    /* LOAD SAVED */
     const saved = JSON.parse(localStorage.getItem("orderForm"));
     if (saved) {
+
         document.querySelector(".name-input").value = saved.name || "";
         document.querySelector(".phone-input").value = saved.phone || "";
         document.querySelector(".address-input").value = saved.address || "";
         document.querySelector(".comment-input").value = saved.comment || "";
-        document.querySelector("select").value = saved.paymentType || "Cash";
+        document.querySelector(".payment-select").value = saved.paymentType || "Cash";
+
+        if(saved.orderType){
+            setOrderType(saved.orderType);
+        }
     }
 
     loadCart();
 };
 
-
-// 🛒 LOAD CART
+/* CART */
 function loadCart() {
 
     const cart = JSON.parse(localStorage.getItem("cart")) || {};
@@ -157,23 +199,12 @@ function loadCart() {
         `;
     });
 
-    const tax = Math.round(subtotal * 0.05 * 100) / 100;
-    const total = Math.round((subtotal + tax) * 100) / 100;
+    const total = Math.round(subtotal * 1.05 * 100) / 100;
 
     html += `
     <div class="receipt-summary">
-        <div class="summary-row">
-            <span>Subtotal</span>
-            <span>${subtotal.toFixed(2)} OMR</span>
-        </div>
-
-        <div class="summary-row">
-            <span>Tax (5%)</span>
-            <span>${tax.toFixed(2)} OMR</span>
-        </div>
-
         <div class="summary-row total">
-            <span>Total</span>
+            <span>Total (incl. 5%)</span>
             <span>${total.toFixed(2)} OMR</span>
         </div>
     </div>
@@ -182,8 +213,7 @@ function loadCart() {
     container.innerHTML = html;
 }
 
-
-// ➕➖ CHANGE QTY
+/* QTY */
 function changeCartQty(id, change) {
 
     let cart = JSON.parse(localStorage.getItem("cart")) || {};
@@ -199,8 +229,7 @@ function changeCartQty(id, change) {
     loadCart();
 }
 
-
-// 📍 LOCATION
+/* LOCATION */
 function getLocation() {
 
     navigator.geolocation.getCurrentPosition(
@@ -211,29 +240,29 @@ function getLocation() {
             document.querySelector(".address-input").value =
                 `https://maps.google.com/?q=${lat},${lng}`;
 
-            saveForm(); // ✅ ADDED
+            saveForm();
         },
-        () => alert("Location failed. Turn on GPS."),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        () => alert("Location failed."),
+        { enableHighAccuracy: true }
     );
 }
 
-
-// ✅ SAVE FORM FUNCTION (ADDED)
+/* SAVE */
 function saveForm() {
+
     const data = {
         name: document.querySelector(".name-input").value,
         phone: document.querySelector(".phone-input").value,
-        address: document.querySelector(".address-input").value,
+        address: document.querySelector(".address-input")?.value || "",
         comment: document.querySelector(".comment-input").value,
-        paymentType: document.querySelector("select").value
+        paymentType: document.querySelector(".payment-select")?.value || "",
+        orderType
     };
 
     localStorage.setItem("orderForm", JSON.stringify(data));
 }
 
-
-// 🚀 PLACE ORDER
+/* PLACE */
 async function placeOrder() {
 
     const cart = JSON.parse(localStorage.getItem("cart")) || {};
@@ -241,35 +270,38 @@ async function placeOrder() {
     const name = document.querySelector(".name-input").value;
     const phone = document.querySelector(".phone-input").value;
     const address = document.querySelector(".address-input").value;
-    const paymentType = document.querySelector("select").value;
+    const paymentType = document.querySelector(".payment-select").value;
     const comment = document.querySelector(".comment-input").value;
 
-    // ✅ SAVE BEFORE ORDER (ADDED)
-    localStorage.setItem("orderForm", JSON.stringify({
-        name, phone, address, comment, paymentType
-    }));
-
-    if (!name || !phone || !address) {
-        alert("Fill all fields");
+    if (!name || !phone) {
+        alert("Fill required fields");
         return;
     }
 
-    if (Object.keys(cart).length === 0) {
-        alert("Cart is empty");
+    if (orderType === "delivery" && !address) {
+        alert("Address required for delivery");
         return;
     }
 
-    submitOrder({ name, phone, address, paymentType, comment, cart });
+    submitOrder({
+        name,
+        phone,
+        address,
+        paymentType,
+        comment,
+        cart,
+        orderType
+    });
 }
 
-
-// ✅ SUBMIT ORDER
+/* SUBMIT */
 async function submitOrder(orderData) {
 
     const btn = document.getElementById("orderBtn");
     btn.disabled = true;
 
     try {
+
         const doc = await db.collection("settings").doc("restaurant").get();
 
         if (!doc.exists || !doc.data().open) {
@@ -289,19 +321,17 @@ async function submitOrder(orderData) {
         });
 
         const box = document.querySelector(".order-box:last-of-type");
-        box.innerHTML += `<div class="success-msg">✅ Order placed successfully!</div>`;
+        box.innerHTML += `<div class="success-msg">✅ Order placed!</div>`;
 
         localStorage.removeItem("cart");
         localStorage.removeItem("pendingOrder");
-
-        // ✅ CLEAR SAVED FORM (ADDED)
         localStorage.removeItem("orderForm");
 
         document.querySelector(".name-input").value = "";
         document.querySelector(".phone-input").value = "";
         document.querySelector(".address-input").value = "";
         document.querySelector(".comment-input").value = "";
-        document.querySelector("select").value = "Cash";
+        document.querySelector(".payment-select").value = "Cash";
 
         loadCart();
 
@@ -312,95 +342,33 @@ async function submitOrder(orderData) {
 
     btn.disabled = false;
 }
+
 </script>
 
 <style>
-html, body {
-    touch-action: manipulation;
-    overflow-x: hidden;
+
+/* TABS */
+.type-tabs {
+    display:flex;
+    margin:15px;
+    border-radius:10px;
+    overflow:hidden;
 }
 
-input, select, textarea {
-    font-size: 16px !important;
+.type-tabs button {
+    flex:1;
+    padding:12px;
+    border:none;
+    font-weight:bold;
+    cursor:pointer;
+    background:#ddd;
 }
 
-.auth-btn {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    background: #f5e6d3;
-    color: #ad0202;
-    padding: 10px 16px;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
+.type-tabs .active {
+    background:#ad0202;
+    color:white;
 }
 
-.order-box {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.order-box input, .order-box select, .comment-input {
-    width: 100%;
-    padding: 14px;
-    border-radius: 10px;
-    border: none;
-    background: #f5e6d3;
-    color: #b30000;
-    font-weight: bold;
-    box-sizing: border-box;
-}
-
-.comment-input {
-    margin-bottom: 12px;
-    min-height: 80px;
-    resize: none;
-}
-
-.address-row {
-    display: flex;
-    gap: 10px;
-    width: 100%;
-}
-
-.address-input {
-    flex: 1;
-}
-
-.location-btn {
-    width: 50px;
-    min-width: 50px;
-    height: 48px;
-    border: none;
-    border-radius: 10px;
-    background: #f5e6d3;
-    color: #b30000;
-    cursor: pointer;
-    font-size: 18px;
-}
-
-.order-box button {
-    width: 100%;
-    height: 48px;
-    border: none;
-    border-radius: 10px;
-    background: #f5e6d3;
-    color: #b30000;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.success-msg {
-    margin-top: 10px;
-    padding: 12px;
-    border-radius: 10px;
-    background: #d4edda;
-    color: #155724;
-    font-weight: bold;
-    text-align: center;
-}
 </style>
 
 </body>
