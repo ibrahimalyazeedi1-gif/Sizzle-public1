@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>Sizzle - Profile</title>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- 🔥 Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+</head>
+
+<body>
+
+<div class="header">
+    <img src="images/logo.png" class="logo">
+
+    <!-- 🔐 TOP RIGHT BUTTON -->
+    <div id="authBtn" class="auth-btn">Login</div>
+
+    <h1>Profile</h1>
+</div>
+
+<div class="categories">
+    <a href="index.html">Home</a>
+    <a href="cart.html">Cart</a>
+    <a href="orders.html">Orders</a>
+</div>
+
+<h2 class="section-title">Account</h2>
+
+<div class="order-box" id="authBox">
+
+    <!-- LOGIN FORM -->
+    <div id="loginForm">
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+
+        <button onclick="login()">Login</button>
+        <button onclick="signup()">Signup</button>
+    </div>
+
+    <!-- USER INFO -->
+    <div id="userInfo" style="display:none;">
+        <p id="userEmail"></p>
+
+        <!-- ✅ ADMIN TEXT -->
+        <p id="adminText" onclick="goToAdmin()" style="display:none; text-decoration: underline; font-size: 13px; cursor: pointer;">
+            Admin Panel
+        </p>
+
+        <button onclick="logout()">Logout</button>
+    </div>
+
+</div>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
+    authDomain: "sizzle-oman.firebaseapp.com",
+    projectId: "sizzle-oman",
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+// ✅ ADMIN EMAILS
+const admins = ["admin1@gmail.com","admin2@gmail.com","ibrahim.alyazeedi1@gmail.com"];
+
+
+// 🔐 STATE LISTENER
+auth.onAuthStateChanged(user => {
+    const btn = document.getElementById("authBtn");
+    const loginForm = document.getElementById("loginForm");
+    const userInfo = document.getElementById("userInfo");
+
+    if (user) {
+        btn.innerHTML = "👤";
+        loginForm.style.display = "none";
+        userInfo.style.display = "block";
+        document.getElementById("userEmail").innerText = user.email;
+
+        const adminText = document.getElementById("adminText");
+
+        if (admins.includes(user.email)) {
+            adminText.style.display = "block";
+        } else {
+            adminText.style.display = "none";
+        }
+
+    } else {
+        btn.innerHTML = "Login";
+        loginForm.style.display = "block";
+        userInfo.style.display = "none";
+        document.getElementById("adminText").style.display = "none";
+    }
+});
+
+
+// 🔘 TOP BUTTON CLICK (FIXED)
+document.getElementById("authBtn").onclick = () => {
+    window.location.href = "login.html";
+};
+
+
+// 🔐 LOGIN
+function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => alert("Logged in!"))
+        .catch(err => alert(err.message));
+}
+
+
+// 🆕 SIGNUP
+function signup() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+        .then(() => alert("Account created!"))
+        .catch(err => alert(err.message));
+}
+
+
+// 🚪 LOGOUT
+function logout() {
+    auth.signOut().then(() => {
+        alert("Logged out");
+    });
+}
+
+
+// 🔥 ADMIN REDIRECT (ADDED)
+function goToAdmin() {
+    const user = auth.currentUser;
+
+    if (!user || !admins.includes(user.email)) {
+        alert("Access denied");
+        return;
+    }
+
+    window.location.href = "admin.html";
+}
+</script>
+
+<style>
+.header {
+    position: relative;
+}
+
+html, body {
+    touch-action: manipulation;
+}
+
+input, select, textarea {
+    font-size: 16px !important;
+}
+
+/* 🔐 AUTH BUTTON */
+.auth-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #f5e6d3;
+    color: #ad0202;
+    padding: 8px 14px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* FORM */
+.order-box input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: none;
+    background: #f5e6d3;
+    color: #b30000;
+}
+
+.order-box button {
+    width: 100%;
+    margin-top: 10px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: #f5e6d3;
+    color: #b30000;
+    font-weight: bold;
+    cursor: pointer;
+}
+</style>
+
+</body>
+</html>

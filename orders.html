@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Orders - Sizzle</title>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+
+/* BODY */
+body {
+    margin: 0;
+    background: #f5e6d3;
+    font-family: Arial, sans-serif;
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    position: relative;
+}
+
+.logo {
+    width: 80px;
+}
+
+/* LOGIN BUTTON */
+.auth-btn {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #f5e6d3;
+    color: #ad0202;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* NAV */
+.categories {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: #700000;
+}
+
+.categories a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+/* CONTAINER */
+.container {
+    padding: 10px 15px 80px;
+}
+
+/* TITLES */
+.section-title {
+    margin-top: 20px;
+}
+
+/* ORDER CARD */
+.order {
+    color: black;
+    background: white;
+    border-radius: 15px;
+    padding: 15px;
+    margin-top: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+/* TOP */
+.order-top {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+/* STATUS */
+.status {
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+}
+
+.preparing { background: #ffe082; }
+.done { background: #c8e6c9; }
+
+/* ITEMS */
+.items {
+    color: black;
+    font-size: 14px;
+    opacity: 0.8;
+    margin-top: 5px;
+}
+
+/* EMPTY MESSAGE FIX 🔥 */
+.empty {
+    margin-top: 15px;
+    padding: 15px;
+    text-align: center;
+    background: #fff;
+    border-radius: 10px;
+    font-weight: bold;
+    color: #7a0000;
+}
+
+/* REORDER BUTTON 🔥 */
+.reorder-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 8px;
+    background: #700000;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+    <img src="images/logo.png" class="logo">
+    <div id="authBtn" class="auth-btn">Login</div>
+</div>
+
+<div class="categories">
+    <a href="index.html">Home</a>
+    <a href="cart.html">Cart</a>
+    <a href="orders.html">Orders</a>
+</div>
+
+<div class="container">
+
+    <h2 class="section-title">🟡 Current Orders</h2>
+    <div id="current-orders"></div>
+
+    <h2 class="section-title">⚫ Past Orders</h2>
+    <div id="past-orders"></div>
+
+</div>
+
+<script>
+
+/* FIREBASE */
+const firebaseConfig = {
+    apiKey: "AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
+    authDomain: "sizzle-oman.firebaseapp.com",
+    projectId: "sizzle-oman",
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+/* ✅ GUEST ID SYSTEM (ADDED) */
+if (!localStorage.getItem("guestId")) {
+    localStorage.setItem("guestId", Date.now().toString());
+}
+
+/* LOGIN BUTTON */
+const authBtn = document.getElementById("authBtn");
+
+auth.onAuthStateChanged(user => {
+    authBtn.innerHTML = user ? "👤" : "Login";
+
+    const userId = user 
+        ? user.uid 
+        : "guest_" + localStorage.getItem("guestId");
+
+    loadOrders(userId);
+});
+
+authBtn.onclick = () => {
+    window.location.href = auth.currentUser ? "profile.html" : "login.html";
+};
+
+/* FORMAT ITEMS */
+function formatItems(cart) {
+    let text = "";
+    for (let id in cart) {
+        if (cart[id]?.qty) {
+            text += `${id.replace(/_/g," ")} x ${cart[id].qty}<br>`;
+        }
+    }
+    return text;
+}
+
+/* REORDER FUNCTION 🔥 */
+function reorder(cart) {
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("Added to cart!");
+    window.location.href = "cart.html";
+}
+
+/* LOAD ORDERS */
+function loadOrders(userId) {
+
+    const current = document.getElementById("current-orders");
+    const past = document.getElementById("past-orders");
+
+    current.innerHTML = "Loading...";
+    past.innerHTML = "Loading...";
+
+    // CURRENT
+    db.collection("orders")
+    .where("userId", "==", userId)
+    .onSnapshot(snap => {
+
+        current.innerHTML = "";
+
+        if (snap.empty) {
+            current.innerHTML = "<div class='empty'>No current orders</div>";
+            return;
+        }
+
+        snap.forEach(doc => {
+            const d = doc.data();
+
+            current.innerHTML += `
+            <div class="order">
+                <div class="order-top">
+                    <span>${d.name || "Customer"}</span>
+                    <span class="status preparing">Preparing</span>
+                </div>
+
+                <div class="items">${formatItems(d.cart)}</div>
+
+                <p>📍 ${d.address || "No address"}</p>
+            </div>`;
+        });
+
+    });
+
+    // PAST
+    db.collection("orderLogs")
+    .where("userId", "==", userId)
+    .limit(20)
+    .onSnapshot(snap => {
+
+        past.innerHTML = "";
+
+        if (snap.empty) {
+            past.innerHTML = "<div class='empty'>No past orders</div>";
+            return;
+        }
+
+        snap.forEach(doc => {
+            const d = doc.data();
+
+            past.innerHTML += `
+            <div class="order">
+                <div class="order-top">
+                    <span>${d.name || "Customer"}</span>
+                    <span class="status done">Completed</span>
+                </div>
+
+                <div class="items">${formatItems(d.cart)}</div>
+
+                <p>📍 ${d.address || "No address"}</p>
+
+                <button class="reorder-btn" onclick='reorder(${JSON.stringify(d.cart)})'>
+                    🔁 Reorder
+                </button>
+            </div>`;
+        });
+
+    });
+}
+
+</script>
+
+</body>
+</html>

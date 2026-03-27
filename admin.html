@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sizzle Admin</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+body { margin:0; font-family:sans-serif; background:#f5e6d3; }
+
+/* HEADER */
+.header {
+    background:#ad0202;
+    color:#fff;
+    padding:20px;
+    text-align:center;
+    position:relative;
+    border-bottom:6px solid #5E0006;
+}
+.logo { height:110px; }
+
+/* EXIT BUTTON */
+.exit-btn {
+    position:absolute;
+    right:20px;
+    top:20px;
+    background:#f5e6d3;
+    color:#ad0202;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    transition:0.2s;
+}
+.exit-btn:hover { transform:translateY(-2px); }
+.exit-btn:active { transform:scale(0.9); }
+
+/* CONTENT */
+.container { padding:20px; padding-bottom:120px; }
+
+/* CARDS */
+.stat {
+    background:#5E0006;
+    color:#fff;
+    padding:14px;
+    border-radius:12px;
+    margin-top:12px;
+    animation:fadeIn 0.3s;
+}
+
+/* BUTTONS */
+button {
+    margin-top:10px;
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.2s;
+}
+button:hover { transform:translateY(-2px); }
+button:active { transform:scale(0.9); }
+
+.complete-btn { background:#28a745; color:white; }
+.delete-btn { background:#dc3545; color:white; }
+
+/* NAV */
+.bottom-nav {
+    position:fixed;
+    bottom:0;
+    width:100%;
+    display:flex;
+    background:#5E0006;
+}
+.bottom-nav button {
+    flex:1;
+    background:none;
+    color:#fff;
+    font-size:24px;
+    position:relative;
+}
+
+/* ACTIVE TAB RED */
+.active { color:#ff3b3b; }
+.active::after {
+    content:"";
+    position:absolute;
+    bottom:0;
+    left:20%;
+    width:60%;
+    height:4px;
+    background:#ff3b3b;
+}
+
+/* PAGE CONTROLS */
+.page-controls {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:15px;
+}
+
+/* ANIMATION */
+@keyframes fadeIn {
+    from { opacity:0 }
+    to { opacity:1 }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <img src="images/logo.png" class="logo">
+    <h2 id="title">🍔 Orders</h2>
+    <button class="exit-btn" onclick="location.href='index.html'">🚪 Exit</button>
+</div>
+
+<div class="container">
+    <div id="content"></div>
+</div>
+
+<div class="bottom-nav">
+    <button onclick="showTab('orders')" id="ordersBtn">🍔</button>
+    <button onclick="showTab('logs')" id="logsBtn">📦</button>
+    <button onclick="showTab('status')" id="statusBtn">📄</button>
+    <button onclick="showTab('menu')" id="menuBtn">🍗</button>
+</div>
+
+<script>
+
+const firebaseConfig = {
+    apiKey:"AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
+    authDomain:"sizzle-oman.firebaseapp.com",
+    projectId:"sizzle-oman"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+/* PAGINATION */
+let lastVisible=null;
+let pageStack=[];
+let currentPage=1;
+const PAGE_SIZE=20;
+
+let ordersListener=null;
+let open=true;
+
+/* MENU ITEMS */
+const MENU_ITEMS = {
+    crispy_chicken: 1.3,
+    buffalo_chicken: 1.5,
+    nashville_chicken: 1.5,
+    chicken_fries: 1.5,
+    smash_beef: 1.3,
+    double_smash: 1.7,
+    mushroom_burger: 1.5,
+    double_mushroom: 1.8,
+    chips: 0.3,
+    sauce: 0.1,
+    soft_drink: 0.3,
+    water: 0.1
+};
+
+async function toggleItem(id, current) {
+    await db.collection("menu").doc(id).set({
+        enabled: !current
+    }, { merge: true });
+}
+
+
+// 🔥 LOAD ON PAGE OPEN
+
+
+/* AUTH */
+auth.onAuthStateChanged(user=>{
+    if(!user) location.href="login.html";
+    else startApp();
+});
+
+/* START */
+function startApp(){
+    showTab("orders");
+
+    db.collection("settings").doc("restaurant")
+    .onSnapshot(doc=>{
+        if(doc.exists){
+            open = doc.data().open;
+
+            // ✅ If user is on status tab, refresh UI
+            if (document.getElementById("title").innerText.includes("Status")) {
+                showTab("status");
+            }
+        }
+    });
+}
+
+/* TOTAL (×1.05) */
+function getTotal(cart){
+    let subtotal=0;
+    for(let item in cart){
+        const d=cart[item];
+        subtotal+=d.qty*d.price;
+    }
+    return (subtotal*1.05).toFixed(2);
+}
+
+/* FULL CART */
+function formatCart(cart){
+    let subtotal=0;
+    let html="";
+
+    for(let item in cart){
+        const d=cart[item];
+        const itemTotal=d.qty*d.price;
+        subtotal+=itemTotal;
+
+        html+=`<div>${d.qty}x ${item} — ${itemTotal.toFixed(2)} OMR</div>`;
+    }
+
+    const total=subtotal*1.05;
+
+    return `
+        ${html}
+        <hr>
+        <div>Subtotal: ${subtotal.toFixed(2)} OMR</div>
+        <strong>Total: ${total.toFixed(2)} OMR</strong>
+    `;
+}
+
+/* COMPLETE */
+function completeOrder(id){
+    db.collection("orders").doc(id).get().then(doc=>{
+        const data=doc.data();
+
+        db.collection("orderLogs").add({
+            ...data,
+            time:new Date()
+        });
+
+        db.collection("orders").doc(id).delete();
+    });
+}
+
+/* DELETE */
+function deleteOnly(id){
+    db.collection("orders").doc(id).delete();
+}
+
+/* CLEAR LOGS */
+function clearLogs(){
+    if(!confirm("Delete ALL logs?")) return;
+
+    db.collection("orderLogs").get()
+    .then(snapshot=>{
+        const batch=db.batch();
+        snapshot.forEach(doc=>batch.delete(doc.ref));
+        return batch.commit();
+    })
+    .then(()=>{
+        alert("Logs cleared");
+        currentPage=1;
+        pageStack=[];
+        loadLogs();
+    });
+}
+
+/* STATUS */
+function toggleStatus(){
+    open = !open;
+
+    db.collection("settings").doc("restaurant").set({ open });
+
+    // ✅ FORCE UI UPDATE IMMEDIATELY
+    showTab("status");
+}
+
+/* TABS */
+function showTab(tab){
+
+    if(ordersListener){
+        ordersListener();
+        ordersListener=null;
+    }
+
+    document.querySelectorAll(".bottom-nav button")
+    .forEach(b=>b.classList.remove("active"));
+
+    const content=document.getElementById("content");
+    const title=document.getElementById("title");
+
+    content.innerHTML="";
+
+    /* ORDERS */
+    if(tab==="orders"){
+        ordersBtn.classList.add("active");
+        title.innerText="🍔 Orders";
+
+        ordersListener=db.collection("orders")
+        .onSnapshot(snap=>{
+
+            if(snap.empty){
+                content.innerHTML="No orders";
+                return;
+            }
+
+            let html="";
+
+            snap.forEach(doc=>{
+                const d=doc.data();
+
+                html+=`
+                <div class="stat">
+                    <strong>${d.name}</strong><br>
+                    📞 ${d.phone}<br>
+                    📍 ${d.address||"No address"}<br>
+                    📝 ${d.comment||"No notes"}<br><br>
+
+                    ${formatCart(d.cart)}
+
+                    <button class="complete-btn" onclick="completeOrder('${doc.id}')">Complete</button>
+                    <button class="delete-btn" onclick="deleteOnly('${doc.id}')">Delete</button>
+                </div>`;
+            });
+
+            content.innerHTML=html;
+        });
+    }
+
+    /* LOGS */
+    if(tab==="logs"){
+        logsBtn.classList.add("active");
+        title.innerText="📦 Completed Orders";
+
+        currentPage=1;
+        pageStack=[];
+        loadLogs();
+    }
+
+    /* STATUS */
+    if(tab==="status"){
+        statusBtn.classList.add("active");
+        title.innerText="📄 Status";
+
+        content.innerHTML=`
+        <div class="stat">
+            <h3>Server Status</h3>
+            <p>${open?"🟢 OPEN":"🔴 CLOSED"}</p>
+            <button onclick="toggleStatus()">Toggle</button>
+        </div>`;
+    }
+
+    /* MENU CONTROL */
+    if(tab==="menu"){
+        menuBtn.classList.add("active");
+        title.innerText="🍗 Menu Control";
+
+        db.collection("menu").onSnapshot(async snap=>{
+
+            let menuData = {};
+
+            snap.forEach(doc=>{
+                menuData[doc.id] = doc.data().enabled;
+            });
+
+            let html = "";
+
+            for(let item in MENU_ITEMS){
+
+                const enabled = menuData[item] !=== true;// default ON
+
+                html += `
+                <div class="stat">
+                    <strong>${item.replace(/_/g," ")}</strong><br>
+                    <p>${enabled ? "🟢 Available" : "🔴 Disabled"}</p>
+                    <button onclick="toggleItem('${item}', ${enabled})">
+                        Toggle
+                    </button>
+                </div>`;
+            }
+
+            content.innerHTML = html;
+        });
+    }
+}
+
+/* LOGS PAGINATION */
+async function loadLogs(direction="first"){
+
+    let base=db.collection("orderLogs").orderBy("time","desc");
+    let query=base.limit(PAGE_SIZE);
+
+    if(direction==="next"&&lastVisible){
+        pageStack.push(lastVisible);
+        query=base.startAfter(lastVisible).limit(PAGE_SIZE);
+        currentPage++;
+    }
+
+    if(direction==="prev"){
+        if(pageStack.length===0) return;
+
+        pageStack.pop();
+        const prev=pageStack[pageStack.length-1];
+
+        query=base.limit(PAGE_SIZE);
+        if(prev) query=base.startAfter(prev).limit(PAGE_SIZE);
+
+        currentPage--;
+    }
+
+    const snap=await query.get();
+    const content=document.getElementById("content");
+
+    if(snap.empty){
+        content.innerHTML="No completed orders";
+        return;
+    }
+
+    lastVisible=snap.docs[snap.docs.length-1];
+
+    const nextCheck=await base.startAfter(lastVisible).limit(1).get();
+
+    const hasNext=!nextCheck.empty;
+    const hasPrev=currentPage>1;
+
+    let html=`
+    <button class="delete-btn" onclick="clearLogs()">🗑 Clear Logs</button>
+    `;
+
+    snap.forEach(doc=>{
+        const d=doc.data();
+
+        html+=`
+        <div class="stat" style="display:flex; justify-content:space-between;">
+            <div>
+                <strong>${d.name}</strong><br>
+                ${d.phone}<br>
+                ${d.time?new Date(d.time.seconds*1000).toLocaleString():""}
+            </div>
+
+            <div style="font-weight:bold;">
+                ${getTotal(d.cart)} OMR
+            </div>
+        </div>`;
+    });
+
+    html+=`<div class="page-controls">`;
+
+    html+=hasPrev?`<button onclick="loadLogs('prev')">⬅ Prev</button>`:`<div></div>`;
+    html+=`<span>Page ${currentPage}</span>`;
+    html+=hasNext?`<button onclick="loadLogs('next')">Next ➡</button>`:`<div></div>`;
+
+    html+=`</div>`;
+
+    content.innerHTML=html;
+}
+
+</script>
+</body>
+</html>

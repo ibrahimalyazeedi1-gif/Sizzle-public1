@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sizzle Signup</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #f5e6d3;
+    min-height: 100dvh;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.home-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #9B0F06;
+    color: #f5e6d3;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 3px solid #5E0006;
+    cursor: pointer;
+}
+
+.box {
+    background: #9B0F06;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    width: 90%;
+    max-width: 360px;
+    color: #f5e6d3;
+    border: 7px solid #5E0006;
+}
+
+input {
+    width: 90%;
+    padding: 14px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: none;
+    background: #f5e6d3;
+    text-align: center;
+}
+
+.link {
+    margin-top: 14px;
+    font-size: 14px;
+}
+
+.link span {
+    color: #4da6ff;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+button {
+    width: 90%;
+    padding: 14px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #5E0006;
+    color: #f5e6d3;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="home-btn" onclick="goHome()">Home</div>
+
+<div class="box">
+    <h2>Sign Up 🍔</h2>
+
+    <input type="text" id="name" placeholder="Full Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <input type="tel" id="phone" placeholder="Phone Number">
+    <button onclick="signup()">Create Account</button>
+    <div class="link">
+        Already have an account?
+        <span onclick="goLogin()">Log in</span>
+    </div>
+</div>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
+    authDomain: "sizzle-oman.firebaseapp.com",
+    projectId: "sizzle-oman",
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+function signup() {
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const phone = document.getElementById("phone").value;
+
+    auth.createUserWithEmailAndPassword(email, password)
+    .then(userCred => {
+
+        // ✅ THIS IS THE ONLY WAY TO SHOW NAME IN AUTH
+        return userCred.user.updateProfile({
+            displayName: name
+        }).then(() => {
+
+            // ✅ STORE EXTRA DATA IN DATABASE
+            return db.collection("users").doc(userCred.user.uid).set({
+                name: name,
+                email: email,
+                phone: phone,
+                createdAt: new Date()
+            });
+
+        });
+
+    })
+    .then(() => {
+        alert("Account created!");
+        window.location.href = "index.html";
+    })
+    .catch(err => alert(err.message));
+}
+
+function goLogin() {
+    window.location.href = "login.html";
+}
+
+function goHome() {
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

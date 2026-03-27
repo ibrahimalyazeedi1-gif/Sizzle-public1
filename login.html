@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Sizzle Login</title>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    background: #f5e6d3;
+    min-height: 100dvh;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 🔙 HOME BUTTON */
+.home-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #9B0F06;
+    color: #f5e6d3;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-weight: bold;
+    border: 3px solid #5E0006;
+    cursor: pointer;
+}
+
+.box {
+    background: #9B0F06;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    width: 90%;
+    max-width: 360px;
+    color: #f5e6d3;
+    border: 7px solid #5E0006;
+}
+
+input {
+    width: 90%;
+    padding: 14px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: none;
+    background: #f5e6d3;
+    text-align: center;
+}
+
+button {
+    width: 90%;
+    padding: 14px;
+    margin-top: 10px;
+    border-radius: 10px;
+    border: none;
+    background: #5E0006;
+    color: #f5e6d3;
+    cursor: pointer;
+}
+
+.link {
+    margin-top: 14px;
+    font-size: 14px;
+}
+
+.link span {
+    color: #4da6ff;
+    text-decoration: underline;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="home-btn" onclick="goHome()">Home</div>
+
+<div class="box">
+    <h2>Login 🍔</h2>
+
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+
+    <div class="link">
+        Don't have an account?
+        <span onclick="goSignup()">Sign up</span>
+    </div>
+</div>
+
+<script>
+const firebaseConfig = {
+    apiKey: "AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
+    authDomain: "sizzle-oman.firebaseapp.com",
+    projectId: "sizzle-oman",
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+
+/* 🔥 FORCE MOBILE TO SAVE LOGIN */
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+/* 🔥 LOGIN BUTTON (MOBILE SAFE) */
+document.querySelector("button").addEventListener("click", login);
+
+function login() {
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+        alert("Enter email and password");
+        return;
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+            // delay fixes mobile bug
+            setTimeout(() => {
+                window.location.href = "index.html";
+            }, 500);
+        })
+        .catch(err => {
+            alert(err.message);
+            console.error(err);
+        });
+}
+
+/* 🔥 ONLY REDIRECT AFTER LOAD (NO LOOP) */
+let checked = false;
+
+auth.onAuthStateChanged(user => {
+    if (checked) return;
+    checked = true;
+
+    if (user) {
+        window.location.href = "index.html";
+    }
+});
+
+function goSignup() {
+    window.location.href = "signup.html";
+}
+
+function goHome() {
+    window.location.href = "index.html";
+}
+</script>
+</body>
+</html>
