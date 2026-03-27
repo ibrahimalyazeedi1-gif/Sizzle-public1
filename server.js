@@ -14,19 +14,36 @@ const prices = {
     mushroom_burger: 1.5,
     double_mushroom: 1.8,
     chips: 0.3,
-    cheese_extra: 0.1,
     sauce: 0.1,
     soft_drink: 0.3,
     water: 0.1
 };
 
 /* CHANGE QUANTITY (HOME PAGE) */
-function changeQty(button, change) {
+async function changeQty(button, change) {
     const item = button.closest(".item");
     const id = item.getAttribute("data-id");
     const countSpan = item.querySelector(".count");
 
     let current = Number(countSpan.textContent);
+
+    // 🔥 BLOCK IF DISABLED
+    if (change > 0) {
+        try {
+            const itemDoc = await db
+                .collection("menu")
+                .doc(id)
+                .get();
+
+            if (itemDoc.exists && itemDoc.data().enabled === false) {
+                alert("This item is currently unavailable");
+                return;
+            }
+        } catch (e) {
+            console.error("Firestore error:", e);
+        }
+    }
+
     current += change;
 
     if (current < 0) current = 0;
@@ -46,7 +63,6 @@ function changeQty(button, change) {
 
     localStorage.setItem("cart", JSON.stringify(cart));
 }
-
 /* LOAD COUNTS ON HOME */
 function loadCartFromStorage() {
     const cart = JSON.parse(localStorage.getItem("cart")) || {};
