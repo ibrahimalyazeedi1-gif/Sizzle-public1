@@ -19,8 +19,62 @@ const prices = {
     water: 0.1
 };
 
+const db = firebase.firestore();
+
+let menuStatus = {};
+
+// 🔥 LIVE MENU STATUS
+db.collection("menu").onSnapshot(snap => {
+    menuStatus = {};
+
+    snap.forEach(doc => {
+        menuStatus[doc.id] = doc.data().enabled;
+    });
+
+    updateMenuUI(); // update UI when data changes
+});
+
+function updateMenuUI() {  
+    document.querySelectorAll(".item").forEach(item => {  
+
+        const id = item.getAttribute("data-id");  
+        const isEnabled = menuStatus[id] !== false;  
+
+        if (!isEnabled) {  
+            item.style.opacity = "0.4";  
+            item.style.pointerEvents = "none";  
+            item.style.filter = "grayscale(100%)";  
+
+            if (!item.querySelector(".disabled-label")) {  
+                const label = document.createElement("div");  
+                label.className = "disabled-label";  
+                label.innerText = "Unavailable";  
+                label.style.color = "red";  
+                label.style.fontWeight = "bold";  
+                item.appendChild(label);  
+            }  
+
+        } else {  
+            item.style.opacity = "1";  
+            item.style.pointerEvents = "auto";  
+            item.style.filter = "none";  
+
+            const label = item.querySelector(".disabled-label");  
+            if (label) label.remove();  
+        }  
+
+    });  
+}
+
 /* CHANGE QUANTITY (HOME PAGE) */
 async function changeQty(button, change) {
+    const id = item.getAttribute("data-id");
+    
+    if (menuStatus[id] === false) {
+        alert("This item is currently unavailable");
+        return;
+    }
+    
     const item = button.closest(".item");
     const id = item.getAttribute("data-id");
     const countSpan = item.querySelector(".count");
