@@ -444,7 +444,8 @@ async function placeOrder(){
 
     // ✅ FIX: block empty cart
     if (Object.keys(cleanedCart).length === 0) {
-        alert("Your cart is empty");
+        document.getElementById("cart-items").innerHTML =
+        "<p style='color:yellow;'>Your cart is empty</p>";
         return;
     }
 
