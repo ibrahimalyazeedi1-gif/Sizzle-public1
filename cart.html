@@ -310,7 +310,18 @@ window.onload = function () {
 /* CART */
 function loadCart() {
 
-    const cart = JSON.parse(localStorage.getItem("cart")) || {};
+    let cart = JSON.parse(localStorage.getItem("cart")) || {};
+
+    // ✅ REMOVE INVALID ITEMS
+    Object.keys(cart).forEach(id => {
+        if (!cart[id] || cart[id].qty <= 0) {
+            delete cart[id];
+        }
+    });
+    
+    // ✅ SAVE CLEAN CART
+    localStorage.setItem("cart", JSON.stringify(cart));
+    
     if (Object.keys(cart).length === 0) {
         alert("Your cart is empty");
         return;
