@@ -380,6 +380,24 @@ function loadCart() {
     container.innerHTML = html;
 }
 
+function changeCartQty(id, change) {
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || {};
+
+    if (!cart[id]) return;
+
+    cart[id].qty += change;
+
+    // remove item if 0
+    if (cart[id].qty <= 0) {
+        delete cart[id];
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    loadCart(); // 🔥 refresh UI
+}
+
 /* LOCATION */
 function getLocation(){
     navigator.geolocation.getCurrentPosition(pos=>{
