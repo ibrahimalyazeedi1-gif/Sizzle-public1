@@ -13,6 +13,15 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+<style>
+    .goog-te-banner-frame.skiptranslate {
+      display: none !important;
+    }
+    body {
+      top: 0px !important;
+    }
+    </style>
+
 </head>
 
 <body>
@@ -35,6 +44,23 @@
     font-size: 14px;
     ">
     🌐 Arabic
+    </button>
+
+    <button onclick="toggleLanguage()" 
+    style="
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 9999;
+    padding: 8px 12px;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    ">
+    EN
     </button>
     
     <img src="images/logo.png" class="logo">
@@ -251,6 +277,8 @@
 </div>
 
 <script>
+let currentLang = "en";
+
 function googleTranslateElementInit() {
   new google.translate.TranslateElement({
     pageLanguage: 'en',
@@ -258,16 +286,27 @@ function googleTranslateElementInit() {
   }, 'google_translate_element');
 }
 
-function translateToArabic() {
+function toggleLanguage() {
   const select = document.querySelector(".goog-te-combo");
-  if (select) {
+  const button = document.querySelector("button");
+
+  if (!select) return;
+
+  if (currentLang === "en") {
     select.value = "ar";
-    select.dispatchEvent(new Event("change"));
+    button.innerHTML = "AR";
+    currentLang = "ar";
+  } else {
+    select.value = "en";
+    button.innerHTML = "EN";
+    currentLang = "en";
   }
+
+  select.dispatchEvent(new Event("change"));
 }
 </script>
 
-<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>"//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     
 <script>
 
