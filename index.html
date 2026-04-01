@@ -24,21 +24,7 @@
     <!-- 🔐 LOGIN / PROFILE BUTTON -->
     <div id="authBtn" class="auth-btn" data-en="Login" data-ar="تسجيل الدخول">Login</div>
 
-    <button onclick="toggleLang()" 
-    style="
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    z-index: 9999;
-    padding: 8px 12px;
-    background: black;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    ">
-    EN
-    </button>
+    <div id="langBtn" class="auth-btn" onclick="toggleLang()">العربية</div>
 </div>
 
 <div class="categories">
@@ -252,7 +238,7 @@ let lang = "en";
 
 function toggleLang() {
   const elements = document.querySelectorAll("[data-en]");
-  const button = document.querySelector("button");
+  const button = document.getElementById("langBtn");
 
   lang = (lang === "en") ? "ar" : "en";
 
@@ -260,12 +246,10 @@ function toggleLang() {
     el.innerText = el.getAttribute("data-" + lang);
   });
 
-  // switch button text
-  button.innerText = lang.toUpperCase();
+  // show what it will switch TO (not current)
+  button.innerText = (lang === "en") ? "العربية" : "English";
 
-  // RTL for Arabic
-  document.body.dir = (lang === "ar") ? "rtl" : "ltr";
-}
+  document
 </script>
     
 <script>
