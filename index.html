@@ -19,10 +19,26 @@
 
 <div class="header">
     <img src="images/logo.png" class="logo">
-    <p class="tagline"><b>JUST SIZZLE IT!</b></p>
+    <p class="tagline" data-ar="arabic"><b>JUST SIZZLE IT!</b></p>
 
     <!-- 🔐 LOGIN / PROFILE BUTTON -->
     <div id="authBtn" class="auth-btn">Login</div>
+
+    <button onclick="toggleLang()" 
+    style="
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 9999;
+    padding: 8px 12px;
+    background: black;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    ">
+    EN
+    </button>
 </div>
 
 <div class="categories">
@@ -231,6 +247,27 @@
     <a href="#drinks">Drinks</a>
 </div>
 
+<script>
+let lang = "en";
+
+function toggleLang() {
+  const elements = document.querySelectorAll("[data-en]");
+  const button = document.querySelector("button");
+
+  lang = (lang === "en") ? "ar" : "en";
+
+  elements.forEach(el => {
+    el.innerText = el.getAttribute("data-" + lang);
+  });
+
+  // switch button text
+  button.innerText = lang.toUpperCase();
+
+  // RTL for Arabic
+  document.body.dir = (lang === "ar") ? "rtl" : "ltr";
+}
+</script>
+    
 <script>
 const firebaseConfig = {
     apiKey: "AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
