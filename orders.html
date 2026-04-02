@@ -231,23 +231,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
     btn.onclick = function () {
         currentLang = currentLang === "en" ? "ar" : "en";
-
+    
         localStorage.setItem("lang", currentLang);
-
+    
         document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
-
+    
         btn.innerHTML = currentLang === "en" ? "EN" : "AR";
-
+    
         applyTranslations();
-
-        // 🔥 reload orders in new language
-        auth.onAuthStateChanged(user => {
-            const userId = user 
-                ? user.uid 
-                : "guest_" + localStorage.getItem("guestId");
-
-            loadOrders(userId);
-        });
+    
+        // ✅ reload instantly
+        const user = auth.currentUser;
+    
+        const userId = user 
+            ? user.uid 
+            : "guest_" + localStorage.getItem("guestId");
+    
+        loadOrders(userId);
     };
 
     applyTranslations();
@@ -331,7 +331,7 @@ function loadOrders(userId) {
                 <div class="items">${formatItems(d.cart)}</div>
             
                 <p>📍 ${d.address || t.no_address}</p>
-            </div>
+            </div>;
         });
 
     });
@@ -366,7 +366,7 @@ function loadOrders(userId) {
                 <button class="reorder-btn" onclick='reorder(${JSON.stringify(d.cart)})'>
                     🔁 Reorder
                 </button>
-            </div>`;
+            </div>;
         });
 
     });
