@@ -610,10 +610,6 @@ async function placeOrder(){
     });
 
     // ✅ FIX: block empty cart
-    if (Object.keys(cleanedCart).length === 0) {
-        showToast("❌ " + (currentLang === "ar" ? "السلة فارغة" : "Cart is empty"), true);
-        return;
-    }
     const name = document.querySelector(".name-input").value;
     const phone = document.querySelector(".phone-input").value;
     const address = document.querySelector(".address-input").value;
