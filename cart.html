@@ -657,7 +657,7 @@ async function placeOrder(){
         time:new Date()
     });
 
-    showToast("address_error", "error");
+   showToast("order_success");
 
     // ✅ CLEAR STORAGE
     localStorage.removeItem("cart");
@@ -672,27 +672,6 @@ async function placeOrder(){
     
     // ✅ RESET TYPE TO DEFAULT
     setType("delivery");
-    
-    // ✅ FORCE EMPTY CART UI
-    loadCart();function showToast(message, type = "success") {
-
-    const toast = document.getElementById("toast");
-
-    toast.innerText = message;
-
-    // reset classes
-    toast.classList.remove("error");
-
-    if (type === "error") {
-        toast.classList.add("error");
-    }
-
-    toast.classList.add("show");
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-    }, 2500);
-}
 }
 
 function showToast(key, type = "success") {
