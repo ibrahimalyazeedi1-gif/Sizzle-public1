@@ -331,7 +331,7 @@ function loadOrders(userId) {
                 <div class="items">${formatItems(d.cart)}</div>
             
                 <p>📍 ${d.address || t.no_address}</p>
-            </div>;
+            </div>`;
         });
 
     });
@@ -366,7 +366,7 @@ function loadOrders(userId) {
                 <button class="reorder-btn" onclick='reorder(${JSON.stringify(d.cart)})'>
                     🔁 Reorder
                 </button>
-            </div>;
+            </div>`;
         });
 
     });
