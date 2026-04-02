@@ -443,7 +443,7 @@ function loadCart() {
         html += `
         <div class="receipt-item">
             <div class="receipt-left">
-                <span>${id.replace(/_/g, " ")}</span>
+                <span data-key="${id}">${id.replace(/_/g, " ")}</span>
             </div>
 
             <div class="receipt-right">
@@ -565,7 +565,6 @@ async function placeOrder(){
 
     // ✅ FIX: block empty cart
     if (Object.keys(cleanedCart).length === 0) {
-        document.getElementById("cart-items").innerHTML =
         const t = translations[currentLang];
         document.getElementById("cart-items").innerHTML =
         `<p style='font-weight: bold; color: white;' data-key="empty_cart">${t.empty_cart}</p>`;
