@@ -326,21 +326,8 @@ document.getElementById("langBtn").onclick = function () {
 
     document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
 
-    // TEXT
-    document.querySelectorAll("[data-key]:not(#authBtn)").forEach(el => {
-        const key = el.getAttribute("data-key");
-        if (translations[currentLang][key]) {
-            el.innerHTML = translations[currentLang][key];
-        }
-    });
-
-    // PLACEHOLDERS
-    document.querySelectorAll("[data-key-placeholder]").forEach(el => {
-        const key = el.getAttribute("data-key-placeholder");
-        if (translations[currentLang][key]) {
-            el.placeholder = translations[currentLang][key];
-        }
-    });
+    loadCart();          // rebuild cart
+    applyTranslations(); // then translate everything
 };
 </script>
     
