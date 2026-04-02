@@ -245,6 +245,16 @@
 </div>
 
 <script>
+const firebaseConfig = {
+    apiKey: "AIzaSyA0NPkfK_jdoF95XAy0m_dHrFxmTyTr7kE",
+    authDomain: "sizzle-oman.firebaseapp.com",
+    projectId: "sizzle-oman",
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+</script>
+    
+<script>
 let currentLang = "en";
 
 const translations = {
