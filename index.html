@@ -320,6 +320,8 @@ const translations = {
 document.getElementById("langBtn").onclick = function () {
     currentLang = currentLang === "en" ? "ar" : "en";
 
+    localStorage.setItem("lang", currentLang); // ✅ SAVE
+
     this.innerHTML = currentLang === "en" ? "EN" : "AR";
 
     document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
@@ -335,6 +337,24 @@ document.getElementById("langBtn").onclick = function () {
 
 <script>
 window.onload = function () {
+    const savedLang = localStorage.getItem("lang");
+    if (savedLang) {
+        currentLang = savedLang;
+    }
+    
+    document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
+    
+    document.getElementById("langBtn").innerHTML =
+    currentLang === "en" ? "EN" : "AR";
+    
+    // apply translations on load
+    document.querySelectorAll("[data-key]:not(#authBtn)").forEach(el => {
+        const key = el.getAttribute("data-key");
+        if (translations[currentLang][key]) {
+            el.innerHTML = translations[currentLang][key];
+        }
+    });
+    
     const btn = document.getElementById("authBtn");
 
     firebase.auth().onAuthStateChanged(user => {
