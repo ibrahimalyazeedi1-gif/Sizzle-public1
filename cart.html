@@ -1,3 +1,4 @@
+here is the current cart.html my bad:
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -473,7 +474,7 @@ function loadCart() {
 
     if (items.length === 0) {
         const t = translations[currentLang];
-        container.innerHTML = <p data-key="empty_cart">${t.empty_cart}</p>;
+        container.innerHTML = `<p data-key="empty_cart">${t.empty_cart}</p>`;
         return;
     }
 
@@ -486,7 +487,7 @@ function loadCart() {
         const itemTotal = data.qty * data.price;
         subtotal += itemTotal;
 
-        html += 
+        html += `
         <div class="receipt-item">
             <div class="receipt-left">
                 <span data-key="${id}">${id.replace(/_/g, " ")}</span>
@@ -501,7 +502,7 @@ function loadCart() {
                 <span class="item-total">${itemTotal.toFixed(2)} OMR</span>
             </div>
         </div>
-        ;
+        `;
     });
 
     const tax = Math.round(subtotal * 0.05 * 100) / 100;
@@ -516,7 +517,7 @@ function loadCart() {
 
     const t = translations[currentLang];
     
-    html += 
+    html += `
     <div class="receipt-summary">
         <div class="summary-row">
             <span>${t.subtotal}</span>
@@ -530,10 +531,10 @@ function loadCart() {
     
         ${
             orderType === "delivery"
-            ? <div class="summary-row">
+            ? `<div class="summary-row">
                 <span>${t.delivery_fee}</span>
                 <span>${deliveryFee.toFixed(2)} OMR</span>
-              </div>
+              </div>`
             : ""
         }
     
@@ -542,7 +543,7 @@ function loadCart() {
             <span>${total.toFixed(2)} OMR</span>
         </div>
     </div>
-    ;
+    `;
 
     container.innerHTML = html;
     applyTranslations();
@@ -591,7 +592,7 @@ function changeCartQty(id, change) {
 function getLocation(){
     navigator.geolocation.getCurrentPosition(pos=>{
         document.querySelector(".address-input").value =
-        https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude};
+        `https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
         saveForm();
     });
 }
@@ -613,7 +614,7 @@ async function placeOrder(){
     if (Object.keys(cleanedCart).length === 0) {
         const t = translations[currentLang];
         document.getElementById("cart-items").innerHTML =
-        <p style='font-weight: bold; color: white;' data-key="empty_cart">${t.empty_cart}</p>;
+        `<p style='font-weight: bold; color: white;' data-key="empty_cart">${t.empty_cart}</p>`;
         return;
     }
 
