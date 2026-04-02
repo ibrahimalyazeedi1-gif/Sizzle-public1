@@ -184,7 +184,7 @@ body {
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%) translateY(100px);
-    background: #28a745;
+    background: #28a745; /* default = success */
     color: white;
     padding: 14px 20px;
     border-radius: 10px;
@@ -192,6 +192,10 @@ body {
     opacity: 0;
     transition: all 0.4s ease;
     z-index: 999;
+}
+
+#toast.error {
+    background: #dc3545; /* 🔴 RED */
 }
 
 #toast.show {
@@ -611,9 +615,7 @@ async function placeOrder(){
 
     // ✅ FIX: block empty cart
     if (Object.keys(cleanedCart).length === 0) {
-        const t = translations[currentLang];
-        document.getElementById("cart-items").innerHTML =
-        `<p style='font-weight: bold; color: white;' data-key="empty_cart">${t.empty_cart}</p>`;
+        showToast("❌ Cart is empty", "error");
         return;
     }
 
@@ -623,13 +625,13 @@ async function placeOrder(){
     const paymentType = document.querySelector(".payment-select").value;
     const comment = document.querySelector(".comment-input").value;
 
-    if(!name || !phone){
-        alert("Fill required fields");
+    if(orderType === "delivery" && !address){
+        showToast("❌ Address required", "error");
         return;
     }
 
     if(orderType === "delivery" && !address){
-        alert("Address required");
+        showToast("❌ Address required", "error");
         return;
     }
 
@@ -662,12 +664,39 @@ async function placeOrder(){
     setType("delivery");
     
     // ✅ FORCE EMPTY CART UI
-    loadCart();
+    loadCart();function showToast(message, type = "success") {
+
+    const toast = document.getElementById("toast");
+
+    toast.innerText = message;
+
+    // reset classes
+    toast.classList.remove("error");
+
+    if (type === "error") {
+        toast.classList.add("error");
+    }
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2500);
+}
 }
 
-function showToast(message) {
+function showToast(message, type = "success") {
+
     const toast = document.getElementById("toast");
+
     toast.innerText = message;
+
+    // reset classes
+    toast.classList.remove("error");
+
+    if (type === "error") {
+        toast.classList.add("error");
+    }
 
     toast.classList.add("show");
 
