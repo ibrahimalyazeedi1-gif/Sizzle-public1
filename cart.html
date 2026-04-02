@@ -562,6 +562,20 @@ function loadCart() {
     applyTranslations();
 }
 
+function saveForm() {
+
+    const data = {
+        name: document.querySelector(".name-input").value,
+        phone: document.querySelector(".phone-input").value,
+        address: document.querySelector(".address-input").value,
+        comment: document.querySelector(".comment-input").value,
+        paymentType: document.querySelector(".payment-select").value,
+        orderType: orderType
+    };
+
+    localStorage.setItem("orderForm", JSON.stringify(data));
+}
+    
 function applyTranslations() {
 
     const t = translations[currentLang];
