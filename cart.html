@@ -508,6 +508,28 @@ function loadCart() {
     `;
 
     container.innerHTML = html;
+    applyTranslations();
+}
+
+function applyTranslations() {
+
+    const t = translations[currentLang];
+
+    // TEXT
+    document.querySelectorAll("[data-key]:not(#authBtn)").forEach(el => {
+        const key = el.getAttribute("data-key");
+        if (t[key]) {
+            el.innerHTML = t[key];
+        }
+    });
+
+    // PLACEHOLDERS
+    document.querySelectorAll("[data-key-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-key-placeholder");
+        if (t[key]) {
+            el.placeholder = t[key];
+        }
+    });
 }
 
 function changeCartQty(id, change) {
