@@ -324,7 +324,7 @@ document.getElementById("langBtn").onclick = function () {
 
     document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
 
-    document.querySelectorAll("[data-key]").forEach(el => {
+    document.querySelectorAll("[data-key]:not(#authBtn)").forEach(el => {
         const key = el.getAttribute("data-key");
         if (translations[currentLang][key]) {
             el.innerHTML = translations[currentLang][key];
