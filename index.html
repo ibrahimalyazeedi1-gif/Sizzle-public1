@@ -322,6 +322,21 @@ document.getElementById("langBtn").onclick = function () {
     });
 };
 </script>
+
+<script>
+window.onload = function () {
+    const btn = document.getElementById("authBtn");
+
+    firebase.auth().onAuthStateChanged(user => {
+        btn.innerHTML = user ? "👤" : "Login";
+    });
+
+    btn.onclick = function () {
+        const user = firebase.auth().currentUser;
+        window.location.href = user ? "profile.html" : "login.html";
+    };
+};
+</script>
     
 <script src="script.js"></script>
 
