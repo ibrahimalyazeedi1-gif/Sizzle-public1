@@ -276,6 +276,7 @@ body {
 }
 
 .qty-controls span {
+    padding-bottom: 12px;
     min-width: 18px;
     text-align: center;
     font-size: 13px;
