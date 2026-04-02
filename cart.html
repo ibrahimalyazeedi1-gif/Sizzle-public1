@@ -206,58 +206,134 @@ body {
 
 <div class="header">
     <img src="images/logo.png" class="logo">
-    <div id="authBtn" class="auth-btn">Login</div>
+    <div id="authBtn" class="auth-btn" data-key="login">Login</div>
+
+    <div id="langBtn" style="
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: #f5e6d3;
+        color: #ad0202;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+    ">
+    EN
+    </div>
 </div>
 
 <div class="categories">
-    <a href="index.html">Home</a>
-    <a href="cart.html">Cart</a>
-    <a href="orders.html">Orders</a>
+    <a href="index.html" data-key="home">Home</a>
+    <a href="cart.html" data-key="cart">Cart</a>
+    <a href="orders.html" data-key="orders">Orders</a>
 </div>
 
-<h2 class="section-title">Your Cart</h2>
+<h2 class="section-title" data-key="your_cart">Your Cart</h2>
 
 <!-- 🔥 TABS -->
 <div class="type-tabs">
-    <button id="deliveryTab" class="active" onclick="setType('delivery')">🚚 Delivery</button>
-    <button id="pickupTab" onclick="setType('pickup')">🛍 Pickup</button>
+    <button id="deliveryTab" class="active" onclick="setType('delivery')" data-key="delivery">🚚 Delivery</button>
+    <button id="pickupTab" onclick="setType('pickup')" data-key="pickup">🛍 Pickup</button>
 </div>
 
 <!-- CART -->
 <div class="order-box" id="cart-items">
-    <p>No items added yet</p>
+    <p data-key="empty_cart">No items added yet</p>
 </div>
 
 <!-- FORM -->
 <div class="order-box">
 
-    <h2>Order Details</h2>
+    <h2 data-key="order_details">Order Details</h2>
 
-    <input class="name-input" placeholder="Your Name" oninput="saveForm()">
-    <input class="phone-input" placeholder="Phone Number" oninput="saveForm()">
+    <input class="name-input" placeholder="Your Name" data-key-placeholder="name" oninput="saveForm()">
+    <input class="phone-input" placeholder="Phone Number" data-key-placeholder="phone" oninput="saveForm()">
 
     <!-- DELIVERY ONLY -->
     <div id="deliveryFields">
 
         <div class="address-row">
-            <input class="address-input" placeholder="Address" oninput="saveForm()">
+            <input class="address-input" placeholder="Address" data-key-placeholder="address" oninput="saveForm()">
             <button class="location-btn" onclick="getLocation()">📍</button>
         </div>
 
         <select onchange="saveForm()" class="payment-select">
-            <option>Cash</option>
-            <option>Card on Delivery</option>
+            <option data-key="cash">Cash</option>
+            <option data-key="card">Card on Delivery</option>
         </select>
 
     </div>
 
-    <textarea class="comment-input" placeholder="Add notes (no onions, extra sauce)" oninput="saveForm()"></textarea>
+    <textarea class="comment-input" placeholder="Add notes (no onions, extra sauce)" data-key-placeholder="notes" oninput="saveForm()"></textarea>
 
-    <button id="orderBtn" onclick="placeOrder()">Place Order</button>
+    <button id="orderBtn" onclick="placeOrder()" data-key="place_order">Place Order</button>
     <div id="toast"></div>
 
 </div>
 
+<script>
+let currentLang = "en";
+
+const translations = {
+    en: {
+        home: "Home",
+        cart: "Cart",
+        orders: "Orders",
+        your_cart: "Your Cart",
+        delivery: "🚚 Delivery",
+        pickup: "🛍 Pickup",
+        order_details: "Order Details",
+        place_order: "Place Order",
+
+        name: "Your Name",
+        phone: "Phone Number",
+        address: "Address",
+        notes: "Add notes (no onions, extra sauce)"
+    },
+
+    ar: {
+        home: "الرئيسية",
+        cart: "السلة",
+        orders: "الطلبات",
+        your_cart: "سلتك",
+        delivery: "توصيل",
+        pickup: "استلام",
+        order_details: "تفاصيل الطلب",
+        place_order: "إرسال الطلب",
+
+        name: "الاسم",
+        phone: "رقم الهاتف",
+        address: "العنوان",
+        notes: "ملاحظات (بدون بصل، صوص إضافي)"
+    }
+};
+
+document.getElementById("langBtn").onclick = function () {
+    currentLang = currentLang === "en" ? "ar" : "en";
+
+    this.innerHTML = currentLang === "en" ? "EN" : "AR";
+
+    document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
+
+    // TEXT
+    document.querySelectorAll("[data-key]:not(#authBtn)").forEach(el => {
+        const key = el.getAttribute("data-key");
+        if (translations[currentLang][key]) {
+            el.innerHTML = translations[currentLang][key];
+        }
+    });
+
+    // PLACEHOLDERS
+    document.querySelectorAll("[data-key-placeholder]").forEach(el => {
+        const key = el.getAttribute("data-key-placeholder");
+        if (translations[currentLang][key]) {
+            el.placeholder = translations[currentLang][key];
+        }
+    });
+};
+</script>
+    
 <script>
 
 let orderType = "delivery";
