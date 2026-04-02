@@ -481,7 +481,7 @@ function loadCart() {
 
     items.forEach(([id, data]) => {
 
-        if (!data || !data.qty || !data.price) return;
+        if (!data || data.qty <= 0) return;
 
         const itemTotal = data.qty * data.price;
         subtotal += itemTotal;
