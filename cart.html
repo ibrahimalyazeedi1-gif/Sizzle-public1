@@ -647,9 +647,21 @@ async function placeOrder(){
 
     showToast("✅ Order placed successfully");
 
+    // ✅ CLEAR STORAGE
     localStorage.removeItem("cart");
     localStorage.removeItem("orderForm");
-
+    
+    // ✅ RESET FORM INPUTS
+    document.querySelector(".name-input").value = "";
+    document.querySelector(".phone-input").value = "";
+    document.querySelector(".address-input").value = "";
+    document.querySelector(".comment-input").value = "";
+    document.querySelector(".payment-select").value = "Cash";
+    
+    // ✅ RESET TYPE TO DEFAULT
+    setType("delivery");
+    
+    // ✅ FORCE EMPTY CART UI
     loadCart();
 }
 
