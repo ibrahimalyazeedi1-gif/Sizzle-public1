@@ -625,8 +625,8 @@ async function placeOrder(){
     const paymentType = document.querySelector(".payment-select").value;
     const comment = document.querySelector(".comment-input").value;
 
-    if(orderType === "delivery" && !address){
-        showToast("❌ Address required", "error");
+    if(!name || !phone){
+        showToast("❌ Fill required fields", "error");
         return;
     }
 
