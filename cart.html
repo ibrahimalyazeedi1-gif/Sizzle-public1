@@ -286,6 +286,7 @@ const translations = {
         order_details: "Order Details",
         place_order: "Place Order",
 
+        empty_cart: "No items added yet",
         subtotal: "Subtotal",
         tax: "Tax (5%)",
         delivery_fee: "Delivery",
@@ -307,6 +308,7 @@ const translations = {
         order_details: "تفاصيل الطلب",
         place_order: "إرسال الطلب",
 
+        empty_cart: "لا توجد عناصر بعد",
         subtotal: "المجموع",
         tax: "الضريبة (٥٪)",
         delivery_fee: "التوصيل",
@@ -423,7 +425,8 @@ function loadCart() {
     const items = Object.entries(cart);
 
     if (items.length === 0) {
-        container.innerHTML = "<p>No items added yet</p>";
+        const t = translations[currentLang];
+        container.innerHTML = `<p data-key="empty_cart">${t.empty_cart}</p>`;
         return;
     }
 
@@ -562,7 +565,9 @@ async function placeOrder(){
     // ✅ FIX: block empty cart
     if (Object.keys(cleanedCart).length === 0) {
         document.getElementById("cart-items").innerHTML =
-        "<p style='font-weight: bold; color: white;'>Your cart is empty</p>";
+        const t = translations[currentLang];
+        document.getElementById("cart-items").innerHTML =
+        `<p style='font-weight: bold; color: white;' data-key="empty_cart">${t.empty_cart}</p>`;
         return;
     }
 
