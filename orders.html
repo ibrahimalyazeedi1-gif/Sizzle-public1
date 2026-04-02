@@ -319,7 +319,7 @@ function loadOrders(userId) {
 
     // CURRENT
     db.collection("orders")
-    .where("userId", "==", userId)
+    //.where("userId", "==", userId)
     .get().then(snap => {
 
         current.innerHTML = "";
@@ -349,7 +349,7 @@ function loadOrders(userId) {
 
     // PAST
     db.collection("orderLogs")
-    .where("userId", "==", userId)
+    //.where("userId", "==", userId)
     .limit(20)
     .get().then(snap => {
 
