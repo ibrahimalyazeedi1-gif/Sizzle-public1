@@ -155,9 +155,9 @@ body {
 </div>
 
 <div class="categories">
-    <a href="index.html">Home</a>
-    <a href="cart.html">Cart</a>
-    <a href="orders.html">Orders</a>
+    <a href="index.html" data-key="home">Home</a>
+    <a href="cart.html" data-key="cart">Cart</a>
+    <a href="orders.html" data-key="orders">Orders</a>
 </div>
 
 <div class="container">
@@ -193,6 +193,9 @@ let currentLang = "en";
 
 const translations = {
     en: {
+        home: "Home",
+        cart: "Cart",
+        orders: "Orders",
         current_orders: "🟡 Current Orders",
         past_orders: "⚫ Past Orders",
         no_current: "No current orders",
@@ -205,6 +208,9 @@ const translations = {
         loading: "Loading..."
     },
     ar: {
+        home: "الرئيسية",
+        cart: "السلة",
+        orders: "الطلبات",
         current_orders: "🟡 الطلبات الحالية",
         past_orders: "⚫ الطلبات السابقة",
         no_current: "لا توجد طلبات حالية",
@@ -258,6 +264,11 @@ function applyTranslations() {
 
     document.querySelector(".section-title:nth-of-type(1)").innerText = t.current_orders;
     document.querySelector(".section-title:nth-of-type(2)").innerText = t.past_orders;
+
+    document.querySelectorAll("[data-key]").forEach(el => {
+        const key = el.getAttribute("data-key");
+        if (t[key]) el.innerText = t[key];
+    });
 }
     
 /* LOGIN BUTTON */
@@ -309,7 +320,7 @@ function loadOrders(userId) {
     // CURRENT
     db.collection("orders")
     .where("userId", "==", userId)
-    .onSnapshot(snap => {
+    .get().then(snap => {
 
         current.innerHTML = "";
 
@@ -340,7 +351,7 @@ function loadOrders(userId) {
     db.collection("orderLogs")
     .where("userId", "==", userId)
     .limit(20)
-    .onSnapshot(snap => {
+    .get().then(snap => {
 
         past.innerHTML = "";
 
@@ -355,16 +366,16 @@ function loadOrders(userId) {
             past.innerHTML += `
             <div class="order">
                 <div class="order-top">
-                    <span>${d.name || "Customer"}</span>
-                    <span class="status done">Completed</span>
+                    <span>${d.name || t.customer}</span>
+                    <span class="status done">${t.completed}</span>
                 </div>
-
+            
                 <div class="items">${formatItems(d.cart)}</div>
-
-                <p>📍 ${d.address || "No address"}</p>
-
+            
+                <p>📍 ${d.address || t.no_address}</p>
+            
                 <button class="reorder-btn" onclick='reorder(${JSON.stringify(d.cart)})'>
-                    🔁 Reorder
+                    ${t.reorder}
                 </button>
             </div>`;
         });
