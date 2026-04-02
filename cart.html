@@ -611,25 +611,24 @@ async function placeOrder(){
 
     // ✅ FIX: block empty cart
     if (Object.keys(cleanedCart).length === 0) {
-        const t = translations[currentLang];
-        document.getElementById("cart-items").innerHTML =
-        `<p style='font-weight: bold; color: white;' data-key="empty_cart">${t.empty_cart}</p>`;
+        showToast("❌ " + (currentLang === "ar" ? "السلة فارغة" : "Cart is empty"), true);
         return;
     }
-
     const name = document.querySelector(".name-input").value;
     const phone = document.querySelector(".phone-input").value;
     const address = document.querySelector(".address-input").value;
     const paymentType = document.querySelector(".payment-select").value;
     const comment = document.querySelector(".comment-input").value;
 
+    const t = translations[currentLang];
+    
     if(!name || !phone){
-        alert("Fill required fields");
+        showToast("❌ " + (currentLang === "ar" ? "املأ البيانات المطلوبة" : "Fill required fields"), true);
         return;
     }
-
+    
     if(orderType === "delivery" && !address){
-        alert("Address required");
+        showToast("❌ " + (currentLang === "ar" ? "العنوان مطلوب" : "Address required"), true);
         return;
     }
 
@@ -649,19 +648,20 @@ async function placeOrder(){
 
     localStorage.removeItem("cart");
     localStorage.removeItem("orderForm");
-
+    
+    // ✅ CLEAR INPUTS
+    document.querySelector(".name-input").value = "";
+    document.querySelector(".phone-input").value = "";
+    document.querySelector(".address-input").value = "";
+    document.querySelector(".comment-input").value = "";
+    
+    // ✅ RESET CART UI
     loadCart();
 }
 
-function showToast(message) {
-    const toast = document.getElementById("toast");
-    toast.innerText = message;
-
-    toast.classList.add("show");
-
-    setTimeout(() => {
-        toast.classList.remove("show");
-    }, 2500);
+if (Object.keys(cleanedCart).length === 0) {
+    showToast("❌ " + (currentLang === "ar" ? "السلة فارغة" : "Cart is empty"), true);
+    return;
 }
 </script>
 
