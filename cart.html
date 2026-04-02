@@ -358,12 +358,14 @@ const translations = {
 document.getElementById("langBtn").onclick = function () {
     currentLang = currentLang === "en" ? "ar" : "en";
 
+    localStorage.setItem("lang", currentLang); // ✅ SAVE
+
     this.innerHTML = currentLang === "en" ? "EN" : "AR";
 
     document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
 
-    loadCart();          // rebuild cart
-    applyTranslations(); // then translate everything
+    loadCart();
+    applyTranslations();
 };
 </script>
     
@@ -404,6 +406,16 @@ const auth = firebase.auth();
 
 /* LOAD */
 window.onload = function () {
+
+    const savedLang = localStorage.getItem("lang");
+    if (savedLang) {
+        currentLang = savedLang;
+    }
+    
+    document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
+    
+    document.getElementById("langBtn").innerHTML =
+    currentLang === "en" ? "EN" : "AR";
 
     const btn = document.getElementById("authBtn");
 
