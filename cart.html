@@ -286,6 +286,11 @@ const translations = {
         order_details: "Order Details",
         place_order: "Place Order",
 
+        subtotal: "Subtotal",
+        tax: "Tax (5%)",
+        delivery_fee: "Delivery",
+        total: "Total",
+        
         name: "Your Name",
         phone: "Phone Number",
         address: "Address",
@@ -302,6 +307,11 @@ const translations = {
         order_details: "تفاصيل الطلب",
         place_order: "إرسال الطلب",
 
+        subtotal: "المجموع",
+        tax: "الضريبة (٥٪)",
+        delivery_fee: "التوصيل",
+        total: "الإجمالي",
+        
         name: "الاسم",
         phone: "رقم الهاتف",
         address: "العنوان",
@@ -467,29 +477,31 @@ function loadCart() {
 
     const total = Math.round((subtotal + tax + deliveryFee) * 100) / 100;
 
+    const t = translations[currentLang];
+    
     html += `
     <div class="receipt-summary">
         <div class="summary-row">
-            <span>Subtotal</span>
+            <span>${t.subtotal}</span>
             <span>${subtotal.toFixed(2)} OMR</span>
         </div>
-
+    
         <div class="summary-row">
-            <span>Tax (5%)</span>
+            <span>${t.tax}</span>
             <span>${tax.toFixed(2)} OMR</span>
         </div>
-
+    
         ${
             orderType === "delivery"
             ? `<div class="summary-row">
-                <span>Delivery</span>
+                <span>${t.delivery_fee}</span>
                 <span>${deliveryFee.toFixed(2)} OMR</span>
               </div>`
             : ""
         }
-
+    
         <div class="summary-row total">
-            <span>Total</span>
+            <span>${t.total}</span>
             <span>${total.toFixed(2)} OMR</span>
         </div>
     </div>
