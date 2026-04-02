@@ -316,7 +316,12 @@ const translations = {
         name: "Your Name",
         phone: "Phone Number",
         address: "Address",
-        notes: "Add notes (no onions, extra sauce)"
+        notes: "Add notes (no onions, extra sauce)",
+
+        cart_empty_error: "❌ Cart is empty",
+        fill_fields_error: "❌ Fill required fields",
+        address_error: "❌ Address required",
+        order_success: "✅ Order placed successfully"
     },
 
     ar: {
@@ -355,7 +360,12 @@ const translations = {
         name: "الاسم",
         phone: "رقم الهاتف",
         address: "العنوان",
-        notes: "ملاحظات (بدون بصل، صوص إضافي)"
+        notes: "ملاحظات (بدون بصل، صوص إضافي)",
+
+        cart_empty_error: "❌ السلة فارغة",
+        fill_fields_error: "❌ يرجى تعبئة الحقول",
+        address_error: "❌ العنوان مطلوب",
+        order_success: "✅ تم إرسال الطلب بنجاح"
     }
 };
 
@@ -615,7 +625,7 @@ async function placeOrder(){
 
     // ✅ FIX: block empty cart
     if (Object.keys(cleanedCart).length === 0) {
-        showToast("❌ Cart is empty", "error");
+        showToast("cart_empty_error", "error");
         return;
     }
 
@@ -626,12 +636,12 @@ async function placeOrder(){
     const comment = document.querySelector(".comment-input").value;
 
     if(!name || !phone){
-        showToast("❌ Fill required fields", "error");
+        showToast("fill_fields_error", "error");
         return;
     }
 
     if(orderType === "delivery" && !address){
-        showToast("❌ Address required", "error");
+        showToast("fill_fields_error", "error");
         return;
     }
 
@@ -647,7 +657,7 @@ async function placeOrder(){
         time:new Date()
     });
 
-    showToast("✅ Order placed successfully");
+    showToast("address_error", "error");
 
     // ✅ CLEAR STORAGE
     localStorage.removeItem("cart");
@@ -685,13 +695,13 @@ async function placeOrder(){
 }
 }
 
-function showToast(message, type = "success") {
+function showToast(key, type = "success") {
 
     const toast = document.getElementById("toast");
+    const t = translations[currentLang];
 
-    toast.innerText = message;
+    toast.innerText = t[key] || key; // fallback if missing
 
-    // reset classes
     toast.classList.remove("error");
 
     if (type === "error") {
