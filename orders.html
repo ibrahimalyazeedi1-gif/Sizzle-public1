@@ -138,6 +138,20 @@ body {
 <div class="header">
     <img src="images/logo.png" class="logo">
     <div id="authBtn" class="auth-btn">Login</div>
+
+    <div id="langBtn" style="
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        background: #f5e6d3;
+        color: #ad0202;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+    ">
+    EN
+    </div>
 </div>
 
 <div class="categories">
@@ -175,6 +189,77 @@ if (!localStorage.getItem("guestId")) {
     localStorage.setItem("guestId", Date.now().toString());
 }
 
+let currentLang = "en";
+
+const translations = {
+    en: {
+        current_orders: "🟡 Current Orders",
+        past_orders: "⚫ Past Orders",
+        no_current: "No current orders",
+        no_past: "No past orders",
+        preparing: "Preparing",
+        completed: "Completed",
+        reorder: "🔁 Reorder",
+        no_address: "No address",
+        customer: "Customer",
+        loading: "Loading..."
+    },
+    ar: {
+        current_orders: "🟡 الطلبات الحالية",
+        past_orders: "⚫ الطلبات السابقة",
+        no_current: "لا توجد طلبات حالية",
+        no_past: "لا توجد طلبات سابقة",
+        preparing: "قيد التحضير",
+        completed: "مكتمل",
+        reorder: "🔁 إعادة الطلب",
+        no_address: "لا يوجد عنوان",
+        customer: "عميل",
+        loading: "جاري التحميل..."
+    }
+};
+
+const savedLang = localStorage.getItem("lang");
+if (savedLang) currentLang = savedLang;
+
+document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btn = document.getElementById("langBtn");
+
+    btn.innerHTML = currentLang === "en" ? "EN" : "AR";
+
+    btn.onclick = function () {
+        currentLang = currentLang === "en" ? "ar" : "en";
+
+        localStorage.setItem("lang", currentLang);
+
+        document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
+
+        btn.innerHTML = currentLang === "en" ? "EN" : "AR";
+
+        applyTranslations();
+
+        // 🔥 reload orders in new language
+        auth.onAuthStateChanged(user => {
+            const userId = user 
+                ? user.uid 
+                : "guest_" + localStorage.getItem("guestId");
+
+            loadOrders(userId);
+        });
+    };
+
+    applyTranslations();
+});
+
+function applyTranslations() {
+    const t = translations[currentLang];
+
+    document.querySelector(".section-title:nth-of-type(1)").innerText = t.current_orders;
+    document.querySelector(".section-title:nth-of-type(2)").innerText = t.past_orders;
+}
+    
 /* LOGIN BUTTON */
 const authBtn = document.getElementById("authBtn");
 
@@ -216,8 +301,10 @@ function loadOrders(userId) {
     const current = document.getElementById("current-orders");
     const past = document.getElementById("past-orders");
 
-    current.innerHTML = "Loading...";
-    past.innerHTML = "Loading...";
+    const t = translations[currentLang];
+
+    current.innerHTML = t.loading;
+    past.innerHTML = t.loading;
 
     // CURRENT
     db.collection("orders")
@@ -227,7 +314,7 @@ function loadOrders(userId) {
         current.innerHTML = "";
 
         if (snap.empty) {
-            current.innerHTML = "<div class='empty'>No current orders</div>";
+            current.innerHTML = `<div class='empty'>${t.no_current}</div>`;
             return;
         }
 
@@ -237,14 +324,14 @@ function loadOrders(userId) {
             current.innerHTML += `
             <div class="order">
                 <div class="order-top">
-                    <span>${d.name || "Customer"}</span>
-                    <span class="status preparing">Preparing</span>
+                    <span>${d.name || t.customer}</span>
+                    <span class="status preparing">${t.preparing}</span>
                 </div>
-
+            
                 <div class="items">${formatItems(d.cart)}</div>
-
-                <p>📍 ${d.address || "No address"}</p>
-            </div>`;
+            
+                <p>📍 ${d.address || t.no_address}</p>
+            </div>
         });
 
     });
@@ -258,7 +345,7 @@ function loadOrders(userId) {
         past.innerHTML = "";
 
         if (snap.empty) {
-            past.innerHTML = "<div class='empty'>No past orders</div>";
+            past.innerHTML = `<div class='empty'>${t.no_past}</div>`;
             return;
         }
 
