@@ -6,6 +6,7 @@
 <meta charset="UTF-8">
 <title>Sizzle</title>
 
+<link rel="icon" type="image/png" href="images/logo.png">
 <link rel="stylesheet" href="style.css">
 
 <!-- 🔥 Firebase -->
@@ -49,7 +50,7 @@
 <div class="menu">
 
     <div class="item" data-id="crispy_chicken">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/crispy_chicken.png">
         <h3 data-key="crispy_chicken">Crispy Chicken Burger</h3>
         <div class="price-row">
             <p>1.3 OMR</p>
@@ -62,7 +63,7 @@
     </div>
 
     <div class="item" data-id="buffalo_chicken">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/buffalo.jpg">
         <h3 data-key="buffalo_chicken">Buffalo Chicken Burger</h3>
         <div class="price-row">
             <p>1.5 OMR</p>
@@ -75,7 +76,7 @@
     </div>
 
     <div class="item" data-id="nashville_chicken">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/nashville.png">
         <h3 data-key="nashville_chicken">Nashville Chicken Burger</h3>
         <div class="price-row">
             <p>1.5 OMR</p>
@@ -88,7 +89,7 @@
     </div>
 
     <div class="item" data-id="chicken_fries">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/chicken_fries.png">
         <h3 data-key="chicken_fries">Chicken Fries</h3>
         <div class="price-row">
             <p>1.5 OMR</p>
@@ -107,7 +108,7 @@
 <div class="menu">
 
     <div class="item" data-id="smash_beef">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/smash.jpg">
         <h3 data-key="smash_beef">Smash Beef Burger</h3>
         <div class="price-row">
             <p>1.3 OMR</p>
@@ -120,7 +121,7 @@
     </div>
 
     <div class="item" data-id="double_smash">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/double_smash.jpg">
         <h3 data-key="double_smash">Double Smash</h3>
         <div class="price-row">
             <p>1.7 OMR</p>
@@ -133,7 +134,7 @@
     </div>
 
     <div class="item" data-id="mushroom_burger">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/smash_mushroom.png">
         <h3 data-key="mushroom_burger">Mushroom Burger</h3>
         <div class="price-row">
             <p>1.5 OMR</p>
@@ -146,7 +147,7 @@
     </div>
 
     <div class="item" data-id="double_mushroom">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/double_smash_mushroom.png">
         <h3 data-key="double_mushroom">Double Mushroom</h3>
         <div class="price-row">
             <p>1.8 OMR</p>
@@ -165,7 +166,7 @@
 <div class="menu">
 
     <div class="item" data-id="chips">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/chips.jpg">
         <h3 data-key="chips">Chips</h3>
         <div class="price-row">
             <p>0.3 OMR</p>
@@ -177,21 +178,8 @@
         </div>
     </div>
 
-    <div class="item" data-id="cheese_extra">
-        <img src="images/Screenshot 2026-03-23 185812.png">
-        <h3 data-key="cheese_extra">Cheese (Extra)</h3>
-        <div class="price-row">
-            <p>0.1 OMR</p>
-            <div class="quantity">
-                <button onclick="changeQty(this,-1)">-</button>
-                <span class="count">0</span>
-                <button onclick="changeQty(this,1)">+</button>
-            </div>
-        </div>
-    </div>
-
     <div class="item" data-id="sauce">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/logo_p.png">
         <h3 data-key="sauce">Sauce</h3>
         <div class="price-row">
             <p>0.1 OMR</p>
@@ -210,7 +198,7 @@
 <div class="menu">
 
     <div class="item" data-id="soft_drink">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/logo_p.png">
         <h3 data-key="soft_drink">Soft Drink</h3>
         <div class="price-row">
             <p>0.3 OMR</p>
@@ -223,7 +211,7 @@
     </div>
 
     <div class="item" data-id="water">
-        <img src="images/Screenshot 2026-03-23 185812.png">
+        <img src="images/logo_p.png">
         <h3 data-key="water">Water</h3>
         <div class="price-row">
             <p>0.1 OMR</p>
@@ -280,7 +268,6 @@ const translations = {
         double_mushroom: "Double Mushroom",
 
         chips: "Chips",
-        cheese_extra: "Cheese (Extra)",
         sauce: "Sauce",
 
         soft_drink: "Soft Drink",
@@ -309,7 +296,6 @@ const translations = {
         double_mushroom: "فطر مزدوج",
 
         chips: "بطاطس",
-        cheese_extra: "جبنة إضافية",
         sauce: "صوص",
 
         soft_drink: "مشروب غازي",
@@ -337,28 +323,43 @@ document.getElementById("langBtn").onclick = function () {
 
 <script>
 window.onload = function () {
-    const savedLang = localStorage.getItem("lang");
-    if (savedLang) {
+    let savedLang = localStorage.getItem("lang");
+
+    // ✅ If no saved language, detect user's browser language
+    if (!savedLang) {
+        const userLang = navigator.language || navigator.userLanguage;
+
+        if (userLang.startsWith("ar")) {
+            currentLang = "ar";
+        } else {
+            currentLang = "en";
+        }
+
+        localStorage.setItem("lang", currentLang);
+    } else {
         currentLang = savedLang;
     }
-    
+
+    // ✅ Apply direction
     document.body.style.direction = currentLang === "ar" ? "rtl" : "ltr";
-    
+
+    // ✅ Update button text
     document.getElementById("langBtn").innerHTML =
-    currentLang === "en" ? "EN" : "AR";
-    
-    // apply translations on load
+        currentLang === "en" ? "EN" : "AR";
+
+    // ✅ Apply translations
     document.querySelectorAll("[data-key]:not(#authBtn)").forEach(el => {
         const key = el.getAttribute("data-key");
         if (translations[currentLang][key]) {
             el.innerHTML = translations[currentLang][key];
         }
     });
-    
+
+    // ✅ Auth button logic
     const btn = document.getElementById("authBtn");
 
     firebase.auth().onAuthStateChanged(user => {
-        btn.innerHTML = user ? "👤" : "Login";
+        btn.innerHTML = user ? "👤" : translations[currentLang].login;
     });
 
     btn.onclick = function () {
